@@ -1,21 +1,21 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.30/MicrosoftTeams.schema.json",
   "manifestVersion": "1.30",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "id": "7fee2dee-05a8-48be-9270-9cfb97603d77",
   "developer": {
     "name": "Daniel Laskewitz",
-    "websiteUrl": "https://github.com/Laskewitz/agent-academy-for-cowork",
+    "websiteUrl": "https://github.com/Laskewitz",
     "privacyUrl": "https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement",
     "termsOfUseUrl": "https://docs.github.com/en/site-policy/github-terms/github-terms-of-service"
   },
   "name": {
-    "short": "Agent Academy for Cowork",
-    "full": "Agent Academy for Copilot Cowork"
+    "short": "GitHub for Cowork",
+    "full": "GitHub for Copilot Cowork"
   },
   "description": {
-    "short": "Triage Agent Academy issues and PRs, report status, and plan next actions.",
-    "full": "Help the Agent Academy team manage microsoft/agent-academy in Copilot Cowork. Use the GitHub remote MCP server to retrieve live issues, pull requests, discussions on those items, reviews, and available check results. Triage work, review proposed changes, summarize open and completed work, and recommend next actions. Draft first; post comments, update labels or assignees, request reviewers, and close or reopen issues only after explicit confirmation. These skills do not submit PR reviews, approve or merge PRs, or issue badges. Requires GitHub authorization and repository permissions. This is a community-built plugin, not an official GitHub app."
+    "short": "Work with GitHub in Cowork: browse issues and draft replies for approval.",
+    "full": "GitHub for Cowork brings GitHub issue workflows into Copilot Cowork through the GitHub remote MCP server. Browse and triage issues in a selected repository or across repositories accessible through your authorized GitHub connection, with a separate Markdown table for each repository. Read issue discussions, propose next actions, and draft helpful replies. Post a new issue comment only after you approve its exact content and destination. Requires GitHub authorization and appropriate repository permissions. This community-built plugin is not an official GitHub app."
   },
   "icons": {
     "color": "color.png",
@@ -24,23 +24,17 @@
   "accentColor": "#000000",
   "agentSkills": [
     {
-      "folder": "./skills/agent-academy-guide"
+      "folder": "./skills/github-issues"
     },
     {
-      "folder": "./skills/agent-academy-issues"
-    },
-    {
-      "folder": "./skills/agent-academy-pull-requests"
-    },
-    {
-      "folder": "./skills/agent-academy-status"
+      "folder": "./skills/github-issue-reply"
     }
   ],
   "agentConnectors": [
     {
       "id": "github",
       "displayName": "GitHub MCP",
-      "description": "Connect Agent Academy skills to live issues, pull requests, comments, reviews, repository guidance, and available check results in microsoft/agent-academy through the GitHub remote MCP server. Supported changes require explicit user confirmation in the skills and sufficient GitHub permissions; available MCP tools depend on the connection.",
+      "description": "Connect GitHub for Cowork to GitHub through the remote MCP server. Retrieve accessible repository and issue data for browsing, triage, and reply drafting in Copilot Cowork. The packaged skills post issue comments only after explicit approval; available data and actions depend on authorization and exposed MCP tools.",
       "toolSource": {
         "remoteMcpServer": {
           "mcpServerUrl": "https://api.githubcopilot.com/mcp/",

@@ -1,145 +1,157 @@
-# Agent Academy for Copilot Cowork
+# GitHub for Cowork
 
-A community-built Copilot Cowork plugin for the team maintaining
-[`microsoft/agent-academy`](https://github.com/microsoft/agent-academy).
-It uses the official GitHub remote MCP server at
-`https://api.githubcopilot.com/mcp/` to retrieve live repository data, recommend
-next actions, and carry out a limited set of explicitly confirmed changes.
+Work with GitHub directly in Copilot Cowork. This community-built plugin uses
+the [GitHub remote MCP server](https://api.githubcopilot.com/mcp/) to browse
+issues, propose next actions, and draft answers you can approve for posting.
 
-## Skills
+## Two issue-focused skills
 
-| Skill | Purpose | Example request |
+| Skill | What it does | Example |
 | --- | --- | --- |
-| `agent-academy-guide` | Help choose a workflow when intent is unclear | "Help me manage Agent Academy." |
-| `agent-academy-issues` | List and triage issues; draft replies and next actions | "Which Agent Academy issues need attention, and what should we do next?" |
-| `agent-academy-pull-requests` | List PRs, assess blockers, and review specific changes | "List open PRs and recommend the next action for each." |
-| `agent-academy-status` | Summarize the backlog and closed/merged work | "Give me the current Agent Academy status, including what has been closed." |
+| `github-issues` | Lists and triages issues in one repo or across accessible repos, with one Markdown table per repo | "List open issues across all repositories I can access." |
+| `github-issue-reply` | Reads an issue and discussion, drafts an answer, and posts it only after exact approval | "Propose an answer to owner/repo#42." |
 
-There is no mandatory quiz. Clear requests go straight to the relevant workflow.
-Only vague requests get a short task picker. A detailed PR review without a
-target prompts for a PR after showing candidates.
+Use a specific `owner/repo`, issue URL, explicit repository list, or "all repos".
+Clear requests go directly to the relevant workflow; there is no mandatory quiz.
+If a target is ambiguous, the skill asks one focused question.
 
-The skills focus on `microsoft/agent-academy`, not this plugin repository.
-They separate curriculum development, learner support, badge administration,
-and maintenance so high-volume badge issues do not hide course blockers.
-PR reviews use applicable contribution and writing guidance from the PR's base
-branch, along with changed files, discussion, and available checks.
+## Issue listings
 
-Reports have **no default date cutoff**. They distinguish open issues, open PRs,
-closed issues, merged PRs, and PRs closed without merging. Closed does not always
-mean completed. Lists show up to 20 rows by default, with coverage and totals
-where available; this is a display limit, not a history filter. Incomplete
-pagination, unavailable checks, and missing permissions are disclosed.
+"All repos" means repositories accessible to the signed-in account **through
+the current MCP authorization**, including owned, collaborator, and organization
+repositories where authorized. This can be narrower than what you see on GitHub.
+If the connector cannot enumerate that scope, the skill explains the gap and
+asks for explicit repositories or a narrower scope. Public search, owned-only
+lists, and issues assigned to you are not substitutes for complete enumeration.
 
-These skills do not analyze surveys, verify course completion, or issue badges.
-They complement, rather than replace, Agent Academy's existing feedback-report
-workflow.
+Listings default to **open issues, with no date cutoff**. Ask for closed or all
+states when needed. Repository and issue pages are both paginated, PR records
+are excluded, and counts distinguish complete results from partial retrieval.
+Explicit "all repos" includes forks and archives unless filtered.
 
-## Confirmation before changes
+Each repository gets its own Markdown table:
 
-Analysis, reports, and drafts do not change GitHub. When you request a supported
-action, the skill shows its exact target and content, asks for approval, re-reads
-the target for changes, and then executes only what you approved.
+### owner/repo
 
-| Supported after explicit confirmation | Not supported by these skills |
-| --- | --- |
-| New issue/PR conversation comments | Submitted or inline PR reviews, approvals, and request-changes reviews |
-| Add/remove existing labels and assignees | PR merges or PR close/reopen |
-| Request PR reviewers | New issues/PRs, repository file/branch edits, or workflow runs |
-| Close/reopen issues | Badge issuance, comment edits/deletion, review-thread resolution, or permission changes |
+| Issue | Title | State | Labels | Assignees | Updated | Proposed next action |
+| --- | --- | --- | --- | --- | --- | --- |
+| owner/repo#42 | Example issue | Open | bug | @maintainer | 2026-09-01 | Inspect reproduction details and draft a reply |
 
-An approved batch must enumerate every target and operation. Rejection leaves
-GitHub unchanged; a material change to the target requires a renewed preview.
-Unrelated labels and assignees are preserved. Ambiguous writes are read back
-before any retry to avoid duplicate comments.
+This row illustrates the format; real results link to the actual repository and
+issue. Metadata-only recommendations are marked preliminary. Empty repositories
+get a no-matching-issues row only after a complete successful query; access
+denials, disabled issues, and rate limits get explicit status rows instead.
+Large results can continue in labeled batches, without silently presenting the
+first page as all issues. User-controlled text is escaped for valid tables.
 
-These are **skill behavior rules, not OAuth permission restrictions**. The GitHub
-connector may expose broader capabilities, and the skills cannot technically
-remove those tools or enforce repository-scoped authorization. Use appropriate
-GitHub permissions and organization policies in addition to the skill guidance.
+## Draft, approve, post
 
-## App package
+The reply skill reads the issue and its discussion, proposes an evidence-based
+answer, and shows the exact destination and full text as **Draft - not posted**.
+It asks for approval before posting. Draft-only requests remain draft-only.
 
-- `manifest.json`: Microsoft 365 app manifest with the supplied
-  `OAuthPluginVault` reference ID.
-- `color.png`: 192x192 GitHub mark on a dark background.
-- `outline.png`: 32x32 white GitHub mark on a transparent background.
-- `skills/`: four registered skill folders and their shared workflow policy at
-  `skills/shared/references/github-workflow.md`.
+- Rejection means no write.
+- Edits require a new complete preview and approval.
+- Approval covers one exact comment on one issue, not future or bulk replies.
+- Material changes to the issue/discussion require reassessment and renewed approval.
+- The posted comment is read back, and its actual URL is returned.
+- An ambiguous timeout is investigated before any retry to avoid duplicates.
 
-The manifest uses stable schema version `1.30` (August 2026) and omits
-`mcpToolDescription` to enable dynamic tool discovery, supported by manifest
-versions 1.29 and later when the host permits it.
-No hardcoded tool catalog, scripts, or access tokens are included in the plugin.
-The skills discover the connector's available MCP tools at runtime; they do not
-require the GitHub CLI, a local clone, or a personal access token pasted into chat.
-The vault reference identifies an existing OAuth configuration; it is not an
-access token and does not create or configure OAuth registration.
+**The only supported write is a new issue comment.** No issue creation, metadata
+updates, close/reopen, comment edits/deletions, PR workflows, repository changes,
+or permission changes. Linked PRs can be read as evidence for an issue answer,
+but never become targets for commenting or review.
 
-## Package and install
+These are **skill behavior rules, not OAuth permission restrictions**. The
+connector may expose broader tools. Use appropriate GitHub permissions and
+organization policies in addition to the skill instructions.
 
-From the repository root:
+## Authorization and prerequisites
 
-```sh
-zip -r github-cowork-plugin.zip manifest.json color.png outline.png skills/
+The host needs GitHub MCP tools for issue reads, repository enumeration for
+all-repo requests, and an authorized issue-comment tool for posting.
+Missing tools, permissions, organization approval, or SSO access are reported
+explicitly, not treated as empty results or successful actions.
+
+For an OAuth app, `public_repo` is a starting scope for approved comments on
+public repositories. It does not grant access to private repositories. Private
+repository access with classic OAuth generally requires the broader `repo`
+scope, plus the user's access and any organization authorization. Request that
+broader scope only when needed; these skills do not change OAuth configuration.
+`read:org` alone does not grant private repository contents access.
+
+The plugin requires neither a local clone nor GitHub CLI. Do not paste tokens
+into chat. The manifest's `OAuthPluginVault` reference identifies an existing
+OAuth registration; it is not an access token and does not grant permissions by
+itself. Ensure the registration permits app ID
+`7fee2dee-05a8-48be-9270-9cfb97603d77` if restricted by app ID.
+
+## Package
+
+Version **1.1.0**, using stable Microsoft 365 manifest schema **1.30**.
+Dynamic tool discovery omits `mcpToolDescription` and requires a supporting host.
+
+```text
+github-cowork-plugin.zip
+  manifest.json
+  color.png
+  outline.png
+  skills/
+    github-issues/SKILL.md
+    github-issue-reply/SKILL.md
+    shared/references/github-workflow.md
 ```
 
-Upload the ZIP through your tenant's supported custom-app/plugin upload flow.
-The manifest and two icons must be at the ZIP root, alongside `skills/`.
-Include the shared reference folder; the skills require it before GitHub access.
-Your tenant must allow custom plugins, manifest version 1.30, and dynamic MCP
-tool discovery.
+The manifest and icons remain at the archive root. Both skills require the
+shared reference. The committed root ZIP is the installable package.
 
-Before uploading, ensure the OAuth registration is available to your tenant and,
-if restricted to specific app IDs, permits `7fee2dee-05a8-48be-9270-9cfb97603d77`.
-Users must authorize GitHub access; the vault reference alone does not grant it.
-Live sign-in and tool invocation must be confirmed in Copilot Cowork.
+To rebuild from the repository root using Python's standard library, write a
+fresh archive so removed skill files cannot survive from a previous version:
 
-If your upload channel requires manifest v1.28, do not just change the version:
-that schema also requires an `mcpToolDescription.file` reference and a bundled
-tool-description JSON file containing the actual MCP tool definitions.
+```sh
+python3 - <<'PY'
+from pathlib import Path
+from zipfile import ZIP_DEFLATED, ZipFile
+
+files = [Path("manifest.json"), Path("color.png"), Path("outline.png")]
+files += sorted(Path("skills").rglob("*.md"))
+with ZipFile("github-cowork-plugin.zip", "w", ZIP_DEFLATED) as package:
+    for path in files:
+        package.write(path, path.as_posix())
+PY
+```
+
+This is a packaging command for the developer, not a runtime skill dependency.
+Upload the ZIP through your tenant's custom-plugin upload flow. Your tenant
+must support custom plugins, manifest 1.30, and dynamic MCP discovery.
 
 ## Try it in Cowork
 
-The host must expose GitHub MCP read capabilities for the requested data and
-write capabilities plus repository permissions for confirmed actions.
-Missing tools or access should produce a clear limitation, not an empty report
-or a claim that an action succeeded.
+1. List issues in a specific repository, then across all accessible repositories.
+   Expect one table per repo, pagination coverage, and honest capability limits.
+2. Ask for an answer to a specific issue. Inspect the draft and reject it:
+   nothing should be posted.
+3. On an issue you are authorized to comment on, request a revised draft and
+   approve the exact text. Expect one verified comment and its link.
+4. Ask to close an issue or reply to a PR. Expect an explanation that only
+   approved issue comments are supported.
 
-Use these acceptance scenarios after uploading the package:
+Local fixture evaluations are simulations, not proof of live Cowork discovery,
+OAuth, or writes. Real comment tests need explicit user approval.
 
-1. Ask "Help me manage Agent Academy." Expect a short workflow choice, then ask
-   "List open PRs." Expect a PR list without another picker.
-2. Request repository status with no date range. Expect open and closed/merged
-   work, distinct issue/PR counts, linked evidence, and explicit coverage limits.
-3. Choose a specific PR for review. Expect file/line evidence and applicable
-   authoring guidance, with unknown checks or unreviewed files called out.
-4. On an existing test issue that you are authorized to change, request a
-   low-risk label update. Inspect the exact preview and reject it first: nothing
-   should change. Request it again, approve the preview, and confirm only that
-   update was made. Any cleanup needs its own explicit approval.
-5. Ask to approve or merge a PR. Expect the skill to explain that those actions
-   are outside its scope, without submitting a review or merging.
+## Branding and policies
 
-Local fixture-based evaluations cannot establish live Cowork routing, OAuth
-behavior, or GitHub writes. Those require the connected host and user-authorized
-acceptance scenarios; never use production issues for unapproved test writes.
+The 192x192 color icon and 32x32 transparent white icon derive from the
+[GitHub mark](https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png)
+and remain subject to [GitHub's logo usage guidelines](https://github.com/logos).
+This is a community-built plugin, not an official GitHub app.
 
-## Branding and publishing
-
-The icons are derived from the
-[GitHub mark](https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png).
-GitHub's logo remains subject to its
-[logo usage guidelines](https://github.com/logos).
-This plugin is not an official GitHub app.
-
-Developer metadata identifies this repository's owner. The privacy and terms
-URLs currently point to GitHub's service policies, not a separate policy for
-this community plugin. Review and replace these with appropriate publisher
-policies before distributing the plugin.
+Developer metadata identifies the publisher. The privacy and terms URLs currently
+point to GitHub's service policies, not a separate publisher policy; review and
+replace them with appropriate policies before distribution.
 
 ## References
 
 - [Build plugins for Copilot Cowork](https://learn.microsoft.com/microsoft-365/copilot/cowork/cowork-plugin-development)
-- [Register MCP servers as agent connectors](https://learn.microsoft.com/microsoftteams/platform/m365-apps/agent-connectors)
-- [Microsoft 365 app manifest versions](https://learn.microsoft.com/en-us/microsoftteams/platform/resources/schema/manifest-schema)
+- [Microsoft 365 app manifest reference](https://learn.microsoft.com/en-us/microsoftteams/platform/resources/schema/manifest-schema)
+- [GitHub OAuth scopes](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/scopes-for-oauth-apps)
