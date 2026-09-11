@@ -35,7 +35,7 @@ jobs:
 
       - name: Build and verify package
         env:
-          ASSET_PATH: ${{ runner.temp }}/github-cowork-plugin.zip
+          ASSET_PATH: ${{ runner.temp }}/github-for-cowork.zip
         shell: bash
         run: |
           python3 - <<'PY'
@@ -108,7 +108,7 @@ jobs:
 
       - name: Publish GitHub Release
         env:
-          ASSET_PATH: ${{ runner.temp }}/github-cowork-plugin.zip
+          ASSET_PATH: ${{ runner.temp }}/github-for-cowork.zip
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         shell: bash

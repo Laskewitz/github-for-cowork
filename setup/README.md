@@ -219,7 +219,7 @@ flow; `manifestVersion` identifies the schema, not your release version.
 
 Save the manifest, then run the following from the **repository root**, not
 from `setup/`. This uses Python 3's standard library and creates a fresh archive,
-replacing any existing `github-cowork-plugin.zip`.
+replacing any existing `github-for-cowork.zip`.
 
 ```sh
 python3 - <<'PY'
@@ -228,7 +228,7 @@ from zipfile import ZIP_DEFLATED, ZipFile
 
 files = [Path("manifest.json"), Path("color.png"), Path("outline.png")]
 files += sorted(path for path in Path("skills").rglob("*") if path.is_file())
-with ZipFile("github-cowork-plugin.zip", "w", ZIP_DEFLATED) as package:
+with ZipFile("github-for-cowork.zip", "w", ZIP_DEFLATED) as package:
     for path in files:
         package.write(path, path.as_posix())
 PY
@@ -242,7 +242,7 @@ existing ZIPs, test outputs, and any credential files. Keep secrets out of
 The resulting layout is:
 
 ```text
-github-cowork-plugin.zip
+github-for-cowork.zip
   manifest.json
   color.png
   outline.png
@@ -283,7 +283,7 @@ the tagged source. It does not upload the prebuilt ZIP from the repository.
 
 The workflow packages **only the manifest, both icons, and all files under
 `skills/`**, then creates a GitHub Release with generated notes and attaches
-`github-cowork-plugin.zip`. Setup docs, the root README, workflow files, and
+`github-for-cowork.zip`. Setup docs, the root README, workflow files, and
 other repository files are not included.
 
 Before releasing:
@@ -319,7 +319,7 @@ against it. This is useful for retrying a run after fixing the workflow file
 itself, without creating a new tag.
 
 Open the repository's **Actions** tab to monitor **Release plugin package**.
-After it succeeds, open **Releases** and download `github-cowork-plugin.zip`
+After it succeeds, open **Releases** and download `github-for-cowork.zip`
 from the release's **Assets**. GitHub's automatically generated **Source code**
 archives contain the repository and are not the installable plugin package.
 
