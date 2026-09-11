@@ -248,6 +248,7 @@ github-for-cowork.zip
   outline.png
   skills/
     github-issues/SKILL.md
+    github-priority-matrix/SKILL.md
     github-issue-reply/SKILL.md
     shared/references/github-workflow.md
 ```

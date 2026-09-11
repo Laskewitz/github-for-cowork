@@ -1,7 +1,7 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.30/MicrosoftTeams.schema.json",
   "manifestVersion": "1.30",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "id": "7fee2dee-05a8-48be-9270-9cfb97603d77",
   "developer": {
     "name": "Daniel Laskewitz",
@@ -14,8 +14,8 @@
     "full": "GitHub for Copilot Cowork"
   },
   "description": {
-    "short": "Work with GitHub in Cowork: browse issues and draft replies for approval.",
-    "full": "GitHub for Cowork brings GitHub issue workflows into Copilot Cowork through the GitHub remote MCP server. Browse and triage issues in a selected repository or across repositories accessible through your authorized GitHub connection, with a separate Markdown table for each repository. Read issue discussions, propose next actions, and draft helpful replies. Post a new issue comment only after you approve its exact content and destination. Requires GitHub authorization and appropriate repository permissions. This community-built plugin is not an official GitHub app."
+    "short": "Browse, prioritize, and reply to GitHub issues in Cowork.",
+    "full": "GitHub for Cowork brings GitHub issue workflows into Copilot Cowork through the GitHub remote MCP server. Browse and triage issues in a selected repository or across repositories accessible through your authorized GitHub connection, with a separate Markdown table for each repository. Turn open issues into a prioritized action plan using an impact vs. effort matrix. Read issue discussions, propose next actions, and draft helpful replies. Post a new issue comment only after you approve its exact content and destination. Requires GitHub authorization and appropriate repository permissions. This community-built plugin is not an official GitHub app."
   },
   "icons": {
     "color": "color.png",
@@ -28,6 +28,9 @@
     },
     {
       "folder": "./skills/github-issue-reply"
+    },
+    {
+      "folder": "./skills/github-priority-matrix"
     }
   ],
   "agentConnectors": [

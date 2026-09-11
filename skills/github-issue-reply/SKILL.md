@@ -14,84 +14,52 @@ compatibility: Requires GitHub remote MCP issue reads and an authorized issue-co
 # GitHub Issue Reply
 
 Read [the shared workflow policy](../shared/references/github-workflow.md)
-first. Posting follows its exact-preview, approval, fresh-read, and verification
-contract. A new comment on an issue is the only write this workflow supports.
+first - posting follows its exact approval contract. A new issue comment is
+the only write this workflow supports.
 
 ## Resolve the conversation
 
-Use the supplied issue URL or established `owner/repo` and issue number.
-For ambiguous numbers across repositories, ask which destination. Never default
-to the plugin source repository. If the user has not selected an issue, use
-[GitHub Issues](../github-issues/SKILL.md) to show candidates or ask for its URL.
-Do not ask again when the target is clear.
-
-If this is an approval or revision of an existing draft, recover the exact
-preview and destination from the conversation. If either is missing, re-preview
-rather than treating a generic "yes" as authorization.
+Use the supplied issue URL or established `owner/repo` + number; ask which
+destination only if ambiguous, and never default to the plugin's own repo. If
+no issue is selected yet, use [GitHub Issues](../github-issues/SKILL.md) to
+find one. For an approval/revision of an existing draft, recover the exact
+preview and destination from context - a generic "yes" without a visible draft
+means re-preview, not authorization.
 
 ## Understand before answering
 
-Read the current issue body, state, labels, and paginated discussion. Confirm
-the record is an issue, not a PR. Check whether the question has already been
-answered or new information changes the appropriate response.
-
-Retrieve relevant repository documentation, contribution guidance, or linked
-fixes through MCP where available. Do not read unrelated private repositories
-just to enrich an answer. Linked PRs can provide issue-resolution evidence;
-do not start a PR review or post a PR comment.
-
-Separate what is established from hypotheses. A proposed PR is not a merged
-fix, and a merged fix is not proof that the reporter's environment is resolved.
-Do not claim tests, reproduction, or product behavior you have not verified.
-If key details are missing, draft specific clarifying questions instead of
-inventing a solution. If discussion retrieval is incomplete, disclose that and
-do not post until the evidence needed for a reliable answer is available.
+Read the current issue body, state, labels, and paginated discussion; confirm
+it's an issue, not a PR. Pull relevant repo docs or linked fixes as needed, but
+don't read unrelated private repositories just to enrich an answer. Separate
+established facts from hypotheses - a proposed fix isn't a merged one, and a
+merged fix isn't proof the reporter's problem is resolved. If key details are
+missing, draft clarifying questions instead of guessing.
 
 ## Propose the answer
 
-Write a natural, helpful response appropriate to the issue: acknowledge the
-reported problem briefly, explain supported findings, give concrete next steps,
-and ask only necessary questions. Link supporting public or same-repository
-evidence when useful. Avoid unnecessary personal data, internal notes, boilerplate,
-claims of maintainer authority, and promises about fixes or delivery dates.
+Write a natural, helpful reply: acknowledge the problem, share supported
+findings, give concrete next steps, ask only necessary questions. Avoid
+unnecessary personal data, claims of maintainer authority, or delivery promises.
 
-Show:
-
-**Destination:** linked `owner/repo#number`.
-
-**Draft - not posted**
-
-The complete proposed comment, clearly separated from private analysis.
-
-If the user explicitly requested drafting only, provide the draft without
-pressuring them to post. Otherwise ask using the host's question UI if available:
-
-> Post this exact comment to owner/repo#number?
-
-Wait for the user's response. Do not call a write tool in the same step as an
-unanswered approval request.
+Show the destination (`owner/repo#number`), then the full text under
+**Draft - not posted**. If the user asked for a draft only, stop there.
+Otherwise ask "Post this exact comment to owner/repo#number?" and wait -
+never call the write tool in the same step as an unanswered request.
 
 ## Handle the decision
 
-- **Reject:** acknowledge; do not write.
-- **Revise:** show the complete revised draft and ask again. The old approval
-  cannot authorize new text.
-- **Approve:** approval must unambiguously refer to the displayed destination
-  and exact text. Re-read the issue and discussion immediately before posting.
-  If material context changed, reassess and obtain renewed approval.
-- **Multiple issues:** use a separate draft and approval for each issue.
-  Never broadcast one reply across all repositories from a blanket instruction.
+- **Reject:** no write. **Revise:** new full draft + new approval - the old
+  approval never carries over to new text.
+- **Approve:** must clearly match the shown destination and text. Re-read the
+  issue right before posting; if context changed materially, re-preview.
+- **Multiple issues:** a separate draft and approval per issue - never
+  broadcast one reply across repositories from a blanket instruction.
 
-Confirm commenting is possible and the target is still an issue. Explain
-locked, archived, inaccessible, or unsupported targets without attempting an
-alternative write. The only payload is the approved comment text on that issue;
-do not add a label, assignment, closure, signature, or other unapproved change.
+Confirm commenting is still possible on that issue before posting; explain
+locked/archived/unsupported targets instead of finding an alternative write.
+After posting, read back the comment, return its real URL, and report clearly
+if verification failed. After an ambiguous timeout, check for the comment
+before any retry - never post a duplicate.
 
-After posting, read back the comment and verify its text and destination.
-Return the actual created comment URL and a concise outcome. If the write or
-readback is uncertain, say what is known and stop. After a timeout, check for
-the comment before any retry; do not post duplicate replies.
-
-If asked to close the issue, edit its body, change metadata, reply to a PR, or
-perform other writes, explain that this workflow only posts approved issue
-comments. Do not reinterpret a prohibited action as permission to post.
+If asked to close the issue, edit metadata, reply to a PR, or make any other
+change, explain that this workflow only posts approved issue comments.

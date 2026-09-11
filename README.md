@@ -10,11 +10,12 @@ Follow the [OAuth setup guide](setup/README.md) to create a GitHub OAuth app,
 register its credentials in the Teams Developer Portal, and connect the
 registration to this plugin's manifest.
 
-## Two issue-focused skills
+## Three GitHub skills
 
 | Skill | What it does | Example |
 | --- | --- | --- |
 | `github-issues` | Lists and triages issues in one repo or across accessible repos, with one Markdown table per repo | "List open issues across all repositories I can access." |
+| `github-priority-matrix` | Turns open issues into a prioritized action plan using an impact vs. effort matrix (low effort/high impact first) | "Give me an action plan for owner/repo based on impact and effort." |
 | `github-issue-reply` | Reads an issue and discussion, drafts an answer, and posts it only after exact approval | "Propose an answer to owner/repo#42." |
 
 Use a specific `owner/repo`, issue URL, explicit repository list, or "all repos".
@@ -25,11 +26,14 @@ If a target is ambiguous, the skill asks one focused question.
 
 1. List issues in a specific repository, then across all accessible repositories.
    Expect one table per repo, pagination coverage, and honest capability limits.
-2. Ask for an answer to a specific issue. Inspect the draft and reject it:
+2. Ask for a prioritized action plan for a repository's open issues. Expect
+   quadrant tables ordered low effort/high impact first, with the signals
+   used and an "insufficient signal" table for anything unrankable.
+3. Ask for an answer to a specific issue. Inspect the draft and reject it:
    nothing should be posted.
-3. On an issue you are authorized to comment on, request a revised draft and
+4. On an issue you are authorized to comment on, request a revised draft and
    approve the exact text. Expect one verified comment and its link.
-4. Ask to close an issue or reply to a PR. Expect an explanation that only
+5. Ask to close an issue or reply to a PR. Expect an explanation that only
    approved issue comments are supported.
 
 Local fixture evaluations are simulations, not proof of live Cowork discovery,
