@@ -40,7 +40,7 @@
       "description": "Connect GitHub for Cowork to GitHub through the remote MCP server. Retrieve accessible repository and issue data for browsing, triage, and reply drafting in Copilot Cowork. The packaged skills post issue comments only after explicit approval; available data and actions depend on authorization and exposed MCP tools.",
       "toolSource": {
         "remoteMcpServer": {
-          "mcpServerUrl": "https://api.githubcopilot.com/mcp/",
+          "mcpServerUrl": "https://api.githubcopilot.com/mcp",
           "authorization": {
             "type": "OAuthPluginVault",
             "referenceId": "YzRlZGQ0MGUtODdjZi00YzkwLTg5NzAtNTNlNmEzNmRlYzIxIyMyZjYyZWUwMi0wNTRiLTQ2YmItYTYyMi02NDVkMWNkYWQ0NWU="
