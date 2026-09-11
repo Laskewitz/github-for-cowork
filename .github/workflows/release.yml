@@ -1,0 +1,110 @@
+name: Release plugin package
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build and publish ZIP
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      TAG_NAME: ${{ github.ref_name }}
+      ASSET_PATH: ${{ runner.temp }}/github-cowork-plugin.zip
+    steps:
+      - name: Check out tagged source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Build and verify package
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import re
+          import struct
+          from pathlib import Path
+          from zipfile import ZIP_DEFLATED, ZipFile
+
+          root = Path.cwd().resolve()
+          manifest = json.loads(Path("manifest.json").read_text())
+          tag = os.environ["TAG_NAME"]
+          if not re.fullmatch(r"v\d+\.\d+\.\d+", tag):
+              raise ValueError("Release tag must have the form vMAJOR.MINOR.PATCH")
+          if tag != f"v{manifest['version']}":
+              raise ValueError("Release tag must match manifest.json version")
+          if manifest["icons"] != {"color": "color.png", "outline": "outline.png"}:
+              raise ValueError("Manifest must reference color.png and outline.png")
+
+          files = [Path("manifest.json"), Path("color.png"), Path("outline.png")]
+          skills = Path("skills")
+          if not skills.is_dir() or skills.is_symlink():
+              raise ValueError("Expected a real skills directory")
+          for path in skills.rglob("*"):
+              if path.is_symlink():
+                  raise ValueError(f"Symlinks cannot be packaged: {path}")
+              if path.is_file():
+                  files.append(path)
+          files = sorted(files)
+          for path in files:
+              if path.is_symlink() or not path.is_file():
+                  raise ValueError(f"Missing or invalid package file: {path}")
+              if not path.resolve().is_relative_to(root):
+                  raise ValueError(f"File is outside the repository: {path}")
+
+          registered = manifest.get("agentSkills", [])
+          if not registered:
+              raise ValueError("No skills registered in manifest")
+          for entry in registered:
+              folder = (root / entry["folder"]).resolve()
+              if not folder.is_relative_to(root / "skills"):
+                  raise ValueError("Registered skill must be inside skills/")
+              if folder / "SKILL.md" not in [root / path for path in files]:
+                  raise ValueError(f"Missing registered SKILL.md: {folder}")
+
+          for name, dimensions in [
+              ("color.png", (192, 192)), ("outline.png", (32, 32))
+          ]:
+              data = Path(name).read_bytes()
+              if data[:8] != b"\x89PNG\r\n\x1a\n" or data[12:16] != b"IHDR":
+                  raise ValueError(f"Invalid PNG header: {name}")
+              if struct.unpack(">II", data[16:24]) != dimensions:
+                  raise ValueError(f"Incorrect icon dimensions: {name}")
+
+          destination = Path(os.environ["ASSET_PATH"])
+          with ZipFile(destination, "w", ZIP_DEFLATED) as package:
+              for path in files:
+                  package.write(path, path.as_posix())
+          with ZipFile(destination) as package:
+              if package.testzip() is not None:
+                  raise ValueError("ZIP integrity check failed")
+              if package.namelist() != [path.as_posix() for path in files]:
+                  raise ValueError("Unexpected ZIP members")
+              for path in files:
+                  if package.read(path.as_posix()) != path.read_bytes():
+                      raise ValueError(f"ZIP content differs: {path}")
+          print(f"Verified {len(files)} package files for {tag}: {destination}")
+          PY
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          gh release create "$TAG_NAME" "$ASSET_PATH" \
+            --verify-tag \
+            --title "GitHub for Cowork $TAG_NAME" \
+            --generate-notes

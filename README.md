@@ -4,6 +4,12 @@ Work with GitHub directly in Copilot Cowork. This community-built plugin uses
 the [GitHub remote MCP server](https://api.githubcopilot.com/mcp/) to browse
 issues, propose next actions, and draft answers you can approve for posting.
 
+## Setup
+
+Follow the [OAuth setup guide](setup/README.md) to create a GitHub OAuth app,
+register its credentials in the Teams Developer Portal, and connect the
+registration to this plugin's manifest.
+
 ## Two issue-focused skills
 
 | Skill | What it does | Example |
@@ -114,7 +120,7 @@ from pathlib import Path
 from zipfile import ZIP_DEFLATED, ZipFile
 
 files = [Path("manifest.json"), Path("color.png"), Path("outline.png")]
-files += sorted(Path("skills").rglob("*.md"))
+files += sorted(path for path in Path("skills").rglob("*") if path.is_file())
 with ZipFile("github-cowork-plugin.zip", "w", ZIP_DEFLATED) as package:
     for path in files:
         package.write(path, path.as_posix())
@@ -122,8 +128,21 @@ PY
 ```
 
 This is a packaging command for the developer, not a runtime skill dependency.
+It includes only the manifest, both icons, and the contents of `skills/`.
+Do not ZIP the whole repository: exclude `setup/`, this README, `.git/`, other
+ZIPs, and credentials. Never store secrets inside the packaged `skills/` folder.
 Upload the ZIP through your tenant's custom-plugin upload flow. Your tenant
 must support custom plugins, manifest 1.30, and dynamic MCP discovery.
+
+## GitHub Releases
+
+The [release workflow](.github/workflows/release.yml) builds a fresh package
+when a tag such as `v1.1.0` is pushed. The tag must match `version` in
+`manifest.json`. It publishes `github-cowork-plugin.zip` as a GitHub Release
+asset, containing only the manifest, icons, and `skills/` contents.
+
+See [publishing a release](setup/README.md#5-publish-a-github-release) for the
+steps and authorization considerations.
 
 ## Try it in Cowork
 
