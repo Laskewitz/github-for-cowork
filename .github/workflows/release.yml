@@ -20,7 +20,6 @@ jobs:
       contents: write
     env:
       TAG_NAME: ${{ github.ref_name }}
-      ASSET_PATH: ${{ runner.temp }}/github-cowork-plugin.zip
     steps:
       - name: Check out tagged source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -28,6 +27,8 @@ jobs:
           persist-credentials: false
 
       - name: Build and verify package
+        env:
+          ASSET_PATH: ${{ runner.temp }}/github-cowork-plugin.zip
         shell: bash
         run: |
           python3 - <<'PY'
@@ -100,6 +101,7 @@ jobs:
 
       - name: Publish GitHub Release
         env:
+          ASSET_PATH: ${{ runner.temp }}/github-cowork-plugin.zip
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         shell: bash
