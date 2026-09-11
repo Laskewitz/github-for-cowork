@@ -275,7 +275,8 @@ must authorize GitHub access, and tenant/GitHub organization policies still appl
 ## 5. Publish a GitHub Release
 
 The [release workflow](../.github/workflows/release.yml) runs when you push a
-tag matching `v*`. It accepts release tags of the form `vMAJOR.MINOR.PATCH`,
+tag matching `v*`, or when manually triggered from the Actions tab for an
+existing tag. It accepts release tags of the form `vMAJOR.MINOR.PATCH`,
 checks that the tag matches `version` in the tagged `manifest.json`, verifies
 the registered skill files and icon dimensions, and builds a fresh ZIP from
 the tagged source. It does not upload the prebuilt ZIP from the repository.
@@ -308,6 +309,14 @@ git push origin v1.1.0
 For later releases, update the manifest's app `version`, commit the changes,
 and use a new matching tag. Do not change `manifestVersion` just to create a
 release, and do not move or force-push published release tags.
+
+You can also trigger the same workflow manually instead of pushing a tag: open
+the repository's **Actions** tab, select **Release plugin package**, click
+**Run workflow**, and enter the existing tag (for example `v1.1.0`) in the
+`tag` input. The tag must already exist and still be pushed first — manual
+dispatch does not create the tag, it only re-runs the build and publish steps
+against it. This is useful for retrying a run after fixing the workflow file
+itself, without creating a new tag.
 
 Open the repository's **Actions** tab to monitor **Release plugin package**.
 After it succeeds, open **Releases** and download `github-cowork-plugin.zip`
