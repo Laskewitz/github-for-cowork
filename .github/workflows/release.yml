@@ -31,6 +31,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
+          fetch-depth: 0
           persist-credentials: false
 
       - name: Build and verify package
@@ -106,6 +107,37 @@ jobs:
           print(f"Verified {len(files)} package files for {tag}: {destination}")
           PY
 
+      - name: Generate release notes
+        env:
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          NOTES_PATH="${{ runner.temp }}/release-notes.md"
+          ALL_TAGS=$(git tag --sort=-v:refname)
+          PREV_TAG=$(printf '%s\n' "$ALL_TAGS" | awk -v cur="$TAG_NAME" 'found{print; exit} $0==cur{found=1}')
+
+          {
+            echo "## What's changed"
+            echo
+            if [ -n "$PREV_TAG" ]; then
+              git log "$PREV_TAG..$TAG_NAME" --no-merges --pretty=format:'- %s (`%h`)'
+            else
+              git log "$TAG_NAME" --no-merges --pretty=format:'- %s (`%h`)'
+            fi
+            echo
+            echo
+            if [ -n "$PREV_TAG" ]; then
+              echo "**Full Changelog**: https://github.com/$GH_REPO/compare/$PREV_TAG...$TAG_NAME"
+            else
+              echo "**Full Changelog**: https://github.com/$GH_REPO/commits/$TAG_NAME"
+            fi
+          } > "$NOTES_PATH"
+
+          echo "NOTES_PATH=$NOTES_PATH" >> "$GITHUB_ENV"
+          echo "--- Generated release notes ---"
+          cat "$NOTES_PATH"
+
       - name: Publish GitHub Release
         env:
           ASSET_PATH: ${{ runner.temp }}/github-for-cowork.zip
@@ -116,4 +148,4 @@ jobs:
           gh release create "$TAG_NAME" "$ASSET_PATH" \
             --verify-tag \
             --title "GitHub for Cowork $TAG_NAME" \
-            --generate-notes
+            --notes-file "$NOTES_PATH"

@@ -283,9 +283,15 @@ the registered skill files and icon dimensions, and builds a fresh ZIP from
 the tagged source. It does not upload the prebuilt ZIP from the repository.
 
 The workflow packages **only the manifest, both icons, and all files under
-`skills/`**, then creates a GitHub Release with generated notes and attaches
-`github-for-cowork.zip`. Setup docs, the root README, workflow files, and
-other repository files are not included.
+`skills/`**, then creates a GitHub Release and attaches `github-for-cowork.zip`.
+Setup docs, the root README, workflow files, and other repository files are
+not included.
+
+Release notes list the non-merge commits between the previous tag and this
+one (subject line and short SHA), plus a full-changelog compare link. This
+repo pushes directly to `main` rather than merging pull requests, so GitHub's
+built-in PR-based `--generate-notes` would otherwise produce an empty "What's
+changed" section; the workflow builds notes from `git log` instead.
 
 Before releasing:
 
