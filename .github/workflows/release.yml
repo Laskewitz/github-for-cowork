@@ -1,0 +1,244 @@
+name: Release plugin package
+
+on:
+  pull_request_target:
+    branches:
+      - main
+    types:
+      - closed
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-plugin-package
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build and publish ZIP
+    if: ${{ github.event_name != 'pull_request_target' || github.event.pull_request.merged == true }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      RELEASE_SHA: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.merge_commit_sha || github.sha }}
+    steps:
+      - name: Check out tagged source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.merge_commit_sha || github.ref }}
+          fetch-depth: 0
+
+      - name: Resolve release tag and ensure unique version
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            TAG_NAME="$GITHUB_REF_NAME"
+          else
+            TAG_NAME="$(python3 - <<'PY'
+          import json
+          import re
+          import subprocess
+          from pathlib import Path
+
+          manifest_path = Path("manifest.json")
+          manifest_data = json.loads(manifest_path.read_text())
+          version = manifest_data["version"]
+          if not re.fullmatch(r"\d+\.\d+\.\d+", version):
+              raise ValueError("manifest.json version must have the form MAJOR.MINOR.PATCH")
+
+          major, minor, patch = map(int, version.split("."))
+
+          def tag_exists(tag: str) -> bool:
+              res = subprocess.run(
+                  ["gh", "api", f"repos/{subprocess.os.environ['GH_REPO']}/git/ref/tags/{tag}"],
+                  stdout=subprocess.DEVNULL,
+                  stderr=subprocess.DEVNULL,
+              )
+              return res.returncode == 0
+
+          curr_tag = f"v{major}.{minor}.{patch}"
+          if tag_exists(curr_tag):
+              while tag_exists(f"v{major}.{minor}.{patch}"):
+                  patch += 1
+              new_version = f"{major}.{minor}.{patch}"
+              print(f"::notice::Tag {curr_tag} already exists. Automatically bumping version in manifest.json to {new_version}", file=subprocess.sys.stderr)
+              manifest_data["version"] = new_version
+              manifest_path.write_text(json.dumps(manifest_data, indent=2) + "\n")
+              version = new_version
+
+          print(f"v{version}")
+          PY
+          )"
+          fi
+          echo "TAG_NAME=$TAG_NAME" >> "$GITHUB_ENV"
+
+      - name: Commit manifest version bump if changed
+        if: ${{ github.event_name == 'pull_request_target' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! git diff --quiet manifest.json; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git commit -am "Bump manifest version to ${TAG_NAME#v} [skip ci]"
+            git push origin HEAD:main || true
+            RELEASE_SHA="$(git rev-parse HEAD)"
+            echo "RELEASE_SHA=$RELEASE_SHA" >> "$GITHUB_ENV"
+          fi
+
+      - name: Create release tag
+        if: ${{ github.event_name == 'pull_request_target' || github.event_name == 'workflow_dispatch' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! gh api "repos/$GH_REPO/git/ref/tags/$TAG_NAME" >/dev/null 2>&1; then
+            TAG_OBJECT_SHA="$(
+              gh api --method POST "repos/$GH_REPO/git/tags" \
+                --field tag="$TAG_NAME" \
+                --field message="GitHub for Cowork $TAG_NAME" \
+                --field object="$RELEASE_SHA" \
+                --field type=commit \
+                --jq .sha
+            )"
+            gh api --method POST "repos/$GH_REPO/git/refs" \
+              --field ref="refs/tags/$TAG_NAME" \
+              --field sha="$TAG_OBJECT_SHA"
+          fi
+
+          git fetch --no-tags origin "refs/tags/$TAG_NAME:refs/tags/$TAG_NAME"
+
+      - name: Build and verify package
+        env:
+          ASSET_PATH: ${{ runner.temp }}/github-for-cowork.zip
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import re
+          import struct
+          from pathlib import Path
+          from zipfile import ZIP_DEFLATED, ZipFile
+
+          root = Path.cwd().resolve()
+          manifest = json.loads(Path("manifest.json").read_text())
+          tag = os.environ["TAG_NAME"]
+          if not re.fullmatch(r"v\d+\.\d+\.\d+", tag):
+              raise ValueError("Release tag must have the form vMAJOR.MINOR.PATCH")
+          if tag != f"v{manifest['version']}":
+              raise ValueError("Release tag must match manifest.json version")
+          if manifest["icons"] != {"color": "color.png", "outline": "outline.png"}:
+              raise ValueError("Manifest must reference color.png and outline.png")
+
+          files = [Path("manifest.json"), Path("color.png"), Path("outline.png")]
+          skills = Path("skills")
+          if not skills.is_dir() or skills.is_symlink():
+              raise ValueError("Expected a real skills directory")
+          for path in skills.rglob("*"):
+              if path.is_symlink():
+                  raise ValueError(f"Symlinks cannot be packaged: {path}")
+              if path.is_file():
+                  files.append(path)
+          files = sorted(files)
+          for path in files:
+              if path.is_symlink() or not path.is_file():
+                  raise ValueError(f"Missing or invalid package file: {path}")
+              if not path.resolve().is_relative_to(root):
+                  raise ValueError(f"File is outside the repository: {path}")
+
+          registered = manifest.get("agentSkills", [])
+          if not registered:
+              raise ValueError("No skills registered in manifest")
+          for entry in registered:
+              folder = (root / entry["folder"]).resolve()
+              if not folder.is_relative_to(root / "skills"):
+                  raise ValueError("Registered skill must be inside skills/")
+              if folder / "SKILL.md" not in [root / path for path in files]:
+                  raise ValueError(f"Missing registered SKILL.md: {folder}")
+
+          for name, dimensions in [
+              ("color.png", (192, 192)), ("outline.png", (32, 32))
+          ]:
+              data = Path(name).read_bytes()
+              if data[:8] != b"\x89PNG\r\n\x1a\n" or data[12:16] != b"IHDR":
+                  raise ValueError(f"Invalid PNG header: {name}")
+              if struct.unpack(">II", data[16:24]) != dimensions:
+                  raise ValueError(f"Incorrect icon dimensions: {name}")
+
+          destination = Path(os.environ["ASSET_PATH"])
+          with ZipFile(destination, "w", ZIP_DEFLATED) as package:
+              for path in files:
+                  package.write(path, path.as_posix())
+          with ZipFile(destination) as package:
+              if package.testzip() is not None:
+                  raise ValueError("ZIP integrity check failed")
+              if package.namelist() != [path.as_posix() for path in files]:
+                  raise ValueError("Unexpected ZIP members")
+              for path in files:
+                  if package.read(path.as_posix()) != path.read_bytes():
+                      raise ValueError(f"ZIP content differs: {path}")
+          print(f"Verified {len(files)} package files for {tag}: {destination}")
+          PY
+
+      - name: Generate release notes
+        env:
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          NOTES_PATH="${{ runner.temp }}/release-notes.md"
+          ALL_TAGS=$(git tag --sort=-v:refname || true)
+          PREV_TAG=$(printf '%s\n' "$ALL_TAGS" | awk -v cur="$TAG_NAME" 'found{print; exit} $0==cur{found=1}')
+
+          TARGET_REF="$TAG_NAME"
+          if ! git rev-parse "$TARGET_REF" >/dev/null 2>&1; then
+            TARGET_REF="HEAD"
+          fi
+
+          {
+            echo "## What's changed"
+            echo
+            if [ -n "$PREV_TAG" ] && git rev-parse "$PREV_TAG" >/dev/null 2>&1; then
+              git log "$PREV_TAG..$TARGET_REF" --no-merges --pretty=format:'- %s (`%h`)'
+            else
+              git log "$TARGET_REF" --no-merges --pretty=format:'- %s (`%h`)'
+            fi
+            echo
+            echo
+            if [ -n "$PREV_TAG" ]; then
+              echo "**Full Changelog**: https://github.com/$GH_REPO/compare/$PREV_TAG...$TAG_NAME"
+            else
+              echo "**Full Changelog**: https://github.com/$GH_REPO/commits/$TAG_NAME"
+            fi
+          } > "$NOTES_PATH"
+
+          echo "NOTES_PATH=$NOTES_PATH" >> "$GITHUB_ENV"
+          echo "--- Generated release notes ---"
+          cat "$NOTES_PATH"
+
+      - name: Publish GitHub Release
+        env:
+          ASSET_PATH: ${{ runner.temp }}/github-for-cowork.zip
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          gh release create "$TAG_NAME" "$ASSET_PATH" \
+            --verify-tag \
+            --title "GitHub for Cowork $TAG_NAME" \
+            --notes-file "$NOTES_PATH"
