@@ -18,43 +18,19 @@ issues, propose next actions, and draft answers you can approve for posting.
 When prompted, sign in to GitHub and approve access. Start with read-only
 requests before testing approved comment publishing.
 
-## Shared report requirement
-
-For every report-producing skill in this plugin, the final result is emailed to the
-currently signed-in user through Copilot Cowork and Outlook. Keep the email
-layout responsive and Outlook-safe with plain, robust HTML/CSS that renders well
-on desktop, web, tablet, and mobile clients.
-
 ## Five GitHub skills
 
-| Skill | What it does | Example |
-| --- | --- | --- |
-| `github-issues` | Lists and triages issues in one repo or across accessible repos, with one Markdown table per repo | "List open issues across all repositories I can access." |
-| `github-priority-matrix` | Turns open issues into a prioritized action plan using an impact vs. effort matrix (low effort/high impact first) | "Give me an action plan for owner/repo based on impact and effort." |
-| `github-issue-reply` | Reads an issue and discussion, drafts an answer, and posts it only after exact approval | "Propose an answer to owner/repo#42." |
-| `github-dependency-audit` | Reviews repository dependencies for drift, security risk, and upgrade impact | "Audit the dependencies for owner/repo and rank the risk." |
-| `github-branch-cleanup` | Spots stale and risky branches and flags safe cleanup candidates | "Review stale branches in owner/repo and show what should be cleaned up." |
+| Skill | What it does | Example | Email report |
+| --- | --- | --- | --- |
+| `github-issues` | Lists and triages issues in one repo or across accessible repos, with one Markdown table per repo | "List open issues across all repositories I can access." | ✓ |
+| `github-priority-matrix` | Turns open issues into a prioritized action plan using an impact vs. effort matrix (low effort/high impact first) | "Give me an action plan for owner/repo based on impact and effort." | ✓ |
+| `github-issue-reply` | Reads an issue and discussion, drafts an answer, and posts it only after exact approval | "Propose an answer to owner/repo#42." |  |
+| `github-dependency-audit` | Reviews repository dependencies for drift, security risk, and upgrade impact | "Audit the dependencies for owner/repo and rank the risk." | ✓ |
+| `github-branch-cleanup` | Spots stale and risky branches and flags safe cleanup candidates | "Review stale branches in owner/repo and show what should be cleaned up." | ✓ |
 
 Use a specific `owner/repo`, issue URL, explicit repository list, or "all repos".
 Clear requests go directly to the relevant workflow; there is no mandatory quiz.
 If a target is ambiguous, the skill asks one focused question.
-
-## Try it in Cowork
-
-1. List issues in a specific repository, then across all accessible repositories.
-   Expect one table per repo, pagination coverage, and honest capability limits.
-2. Ask for a prioritized action plan for a repository's open issues. Expect
-   quadrant tables ordered low effort/high impact first, with the signals
-   used and an "insufficient signal" table for anything unrankable.
-3. Ask for an answer to a specific issue. Inspect the draft and reject it:
-   nothing should be posted.
-4. On an issue you are authorized to comment on, request a revised draft and
-   approve the exact text. Expect one verified comment and its link.
-5. Ask to close an issue or reply to a PR. Expect an explanation that only
-   approved issue comments are supported.
-
-Local fixture evaluations are simulations, not proof of live Cowork discovery,
-OAuth, or writes. Real comment tests need explicit user approval.
 
 ## Branding and policies
 
