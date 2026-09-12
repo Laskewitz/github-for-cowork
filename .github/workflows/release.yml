@@ -40,9 +40,11 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Resolve release tag
+      - name: Resolve release tag and ensure unique version
         env:
           DISPATCH_TAG: ${{ inputs.tag }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         shell: bash
         run: |
           set -euo pipefail
@@ -54,16 +56,56 @@ jobs:
             TAG_NAME="$(python3 - <<'PY'
           import json
           import re
+          import subprocess
           from pathlib import Path
 
-          version = json.loads(Path("manifest.json").read_text())["version"]
+          manifest_path = Path("manifest.json")
+          manifest_data = json.loads(manifest_path.read_text())
+          version = manifest_data["version"]
           if not re.fullmatch(r"\d+\.\d+\.\d+", version):
               raise ValueError("manifest.json version must have the form MAJOR.MINOR.PATCH")
+
+          major, minor, patch = map(int, version.split("."))
+
+          def tag_exists(tag: str) -> bool:
+              res = subprocess.run(
+                  ["gh", "api", f"repos/{subprocess.os.environ['GH_REPO']}/git/ref/tags/{tag}"],
+                  stdout=subprocess.DEVNULL,
+                  stderr=subprocess.DEVNULL,
+              )
+              return res.returncode == 0
+
+          curr_tag = f"v{major}.{minor}.{patch}"
+          if tag_exists(curr_tag):
+              while tag_exists(f"v{major}.{minor}.{patch}"):
+                  patch += 1
+              new_version = f"{major}.{minor}.{patch}"
+              print(f"::notice::Tag {curr_tag} already exists. Automatically bumping version in manifest.json to {new_version}", file=subprocess.sys.stderr)
+              manifest_data["version"] = new_version
+              manifest_path.write_text(json.dumps(manifest_data, indent=2) + "\n")
+              version = new_version
+
           print(f"v{version}")
           PY
           )"
           fi
           echo "TAG_NAME=$TAG_NAME" >> "$GITHUB_ENV"
+
+      - name: Commit manifest version bump if changed
+        if: ${{ github.event_name == 'pull_request_target' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! git diff --quiet manifest.json; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git commit -am "Bump manifest version to ${TAG_NAME#v} [skip ci]"
+            git push origin HEAD:main || true
+            RELEASE_SHA="$(git rev-parse HEAD)"
+            echo "RELEASE_SHA=$RELEASE_SHA" >> "$GITHUB_ENV"
+          fi
 
       - name: Create release tag
         if: ${{ github.event_name == 'pull_request_target' }}
