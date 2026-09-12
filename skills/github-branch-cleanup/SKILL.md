@@ -1,5 +1,5 @@
 ---
-name: branch-cleanup
+name: github-branch-cleanup
 description: >-
   Review repository branches for stale, abandoned, or unsafe cleanup candidates.
   Use when the user wants branch hygiene, stale-branch cleanup, merged-release

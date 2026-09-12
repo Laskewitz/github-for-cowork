@@ -1,5 +1,5 @@
 ---
-name: dependency-audit
+name: github-dependency-audit
 description: >-
   Review repository dependencies for outdated packages, version drift, known
   security issues, and upgrade risk. Use when the user asks for a dependency
