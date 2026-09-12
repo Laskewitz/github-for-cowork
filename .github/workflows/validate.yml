@@ -34,29 +34,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Verify version tag is unique
-        shell: bash
-        run: |
-          set -euo pipefail
-          VERSION="$(python3 - <<'PY'
-          import json
-          import re
-          from pathlib import Path
-
-          version = json.loads(Path("manifest.json").read_text())["version"]
-          if not re.fullmatch(r"\d+\.\d+\.\d+", version):
-              raise ValueError("manifest.json version must have the form MAJOR.MINOR.PATCH")
-          print(version)
-          PY
-          )"
-          TAG_NAME="v$VERSION"
-          echo "Checking if tag $TAG_NAME already exists..."
-          if git rev-parse "$TAG_NAME" >/dev/null 2>&1 || git ls-remote --tags origin "refs/tags/$TAG_NAME" | grep -q "$TAG_NAME"; then
-            echo "::error::Tag $TAG_NAME already exists in the repository. Please bump the version in manifest.json before merging."
-            exit 1
-          fi
-          echo "Tag $TAG_NAME is available."
-
       - name: Validate package contents and manifest
         shell: bash
         run: |

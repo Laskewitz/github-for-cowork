@@ -275,16 +275,14 @@ must authorize GitHub access, and tenant/GitHub organization policies still appl
 
 ## 5. Publish a GitHub Release
 
-The [release workflow](../.github/workflows/release.yml) runs automatically
-after a pull request is merged into `main`. It reads `version` from
-`manifest.json`, creates a matching annotated `vMAJOR.MINOR.PATCH` tag at the
-merge commit, verifies the registered skill files and icon dimensions, and
-builds a fresh ZIP from the tagged source. It does not upload the prebuilt ZIP
-from the repository.
-
-The workflow also runs when you push a tag matching `v*`, or when manually
-triggered from the Actions tab for an existing tag. These paths validate that
-the tag matches `version` in the tagged `manifest.json`.
+The [release workflow](../.github/workflows/release.yml) is manual-only. From
+the repository's **Actions** tab, select **Release plugin package**, click
+**Run workflow**, choose the branch to release, and start the run. It reads
+`version` from `manifest.json`, automatically selects the next unused patch
+version when that tag already exists, updates the manifest, creates a matching
+annotated `vMAJOR.MINOR.PATCH` tag, verifies the registered skill files and
+icon dimensions, and builds a fresh ZIP from the tagged source. It does not
+upload the prebuilt ZIP from the repository.
 
 The workflow packages **only the manifest, both icons, and all files under
 `skills/`**, then creates a GitHub Release and attaches `github-for-cowork.zip`.
@@ -304,30 +302,12 @@ Before releasing:
 - Decide whether the release should use your published OAuth registration or
   whether installers must create their own. Including a registration reference
   does not make it usable by every tenant or grant GitHub access.
-- Increment `version` in `manifest.json` to an unused semantic version in the
-  pull request. A merge fails to release if its matching tag already exists.
+- Do not change `manifestVersion` just to create a release, and do not move or
+  force-push published release tags.
 
-Normally, merging the pull request creates the tag and release without further
-action. To publish manually instead, if the manifest version is `1.1.0`, run
-these commands from a checkout at the intended release commit after confirming
-that `v1.1.0` does not already exist:
-
-```sh
-git tag -a v1.1.0 -m "GitHub for Cowork 1.1.0"
-git push origin v1.1.0
-```
-
-For later releases, update the manifest's app `version` in the pull request.
-Do not change `manifestVersion` just to create a release, and do not move or
-force-push published release tags.
-
-You can also trigger the same workflow manually instead of pushing a tag: open
-the repository's **Actions** tab, select **Release plugin package**, click
-**Run workflow**, and enter the existing tag (for example `v1.1.0`) in the
-`tag` input. The tag must already exist and still be pushed first — manual
-dispatch does not create the tag, it only re-runs the build and publish steps
-against it. This is useful for retrying a run after fixing the workflow file
-itself, without creating a new tag.
+The workflow commits any automatic manifest patch-version bump to the selected
+branch before creating the tag and release. No version input, local tag command,
+or manual version calculation is required.
 
 Open the repository's **Actions** tab to monitor **Release plugin package**.
 After it succeeds, open **Releases** and download `github-for-cowork.zip`

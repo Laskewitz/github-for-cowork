@@ -1,20 +1,7 @@
 name: Release plugin package
 
 on:
-  pull_request_target:
-    branches:
-      - main
-    types:
-      - closed
-  push:
-    tags:
-      - "v*"
   workflow_dispatch:
-    inputs:
-      tag:
-        description: "Existing tag to build and publish (e.g. v1.1.0). Must already exist and match manifest.json version."
-        required: true
-        type: string
 
 permissions:
   contents: read
@@ -26,33 +13,26 @@ concurrency:
 jobs:
   release:
     name: Build and publish ZIP
-    if: ${{ github.event_name != 'pull_request_target' || github.event.pull_request.merged == true }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
     env:
-      RELEASE_SHA: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.merge_commit_sha || github.sha }}
+      RELEASE_SHA: ${{ github.sha }}
     steps:
       - name: Check out tagged source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event_name == 'pull_request_target' && github.event.pull_request.merge_commit_sha || github.ref }}
+          ref: ${{ github.ref }}
           fetch-depth: 0
 
-      - name: Resolve release tag and ensure unique version
+      - name: Resolve next release version
         env:
-          DISPATCH_TAG: ${{ inputs.tag }}
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         shell: bash
         run: |
           set -euo pipefail
-          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
-            TAG_NAME="$DISPATCH_TAG"
-          elif [ "$GITHUB_REF_TYPE" = "tag" ]; then
-            TAG_NAME="$GITHUB_REF_NAME"
-          else
-            TAG_NAME="$(python3 - <<'PY'
+          TAG_NAME="$(python3 - <<'PY'
           import json
           import re
           import subprocess
@@ -74,24 +54,20 @@ jobs:
               )
               return res.returncode == 0
 
-          curr_tag = f"v{major}.{minor}.{patch}"
-          if tag_exists(curr_tag):
-              while tag_exists(f"v{major}.{minor}.{patch}"):
-                  patch += 1
-              new_version = f"{major}.{minor}.{patch}"
-              print(f"::notice::Tag {curr_tag} already exists. Automatically bumping version in manifest.json to {new_version}", file=subprocess.sys.stderr)
+          while tag_exists(f"v{major}.{minor}.{patch}"):
+              patch += 1
+          new_version = f"{major}.{minor}.{patch}"
+          if new_version != version:
+              print(f"::notice::Tag v{version} already exists. Automatically bumping version in manifest.json to {new_version}", file=subprocess.sys.stderr)
               manifest_data["version"] = new_version
               manifest_path.write_text(json.dumps(manifest_data, indent=2) + "\n")
-              version = new_version
 
-          print(f"v{version}")
+          print(f"v{new_version}")
           PY
           )"
-          fi
           echo "TAG_NAME=$TAG_NAME" >> "$GITHUB_ENV"
 
       - name: Commit manifest version bump if changed
-        if: ${{ github.event_name == 'pull_request_target' }}
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
@@ -101,13 +77,12 @@ jobs:
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
             git commit -am "Bump manifest version to ${TAG_NAME#v} [skip ci]"
-            git push origin HEAD:main || true
+            git push origin "HEAD:$GITHUB_REF_NAME"
             RELEASE_SHA="$(git rev-parse HEAD)"
             echo "RELEASE_SHA=$RELEASE_SHA" >> "$GITHUB_ENV"
           fi
 
       - name: Create release tag
-        if: ${{ github.event_name == 'pull_request_target' }}
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
@@ -115,7 +90,7 @@ jobs:
         run: |
           set -euo pipefail
           if gh api "repos/$GH_REPO/git/ref/tags/$TAG_NAME" >/dev/null 2>&1; then
-            echo "::error::Tag $TAG_NAME already exists. Increment version in manifest.json before merging."
+            echo "::error::Tag $TAG_NAME already exists after version resolution."
             exit 1
           fi
 
