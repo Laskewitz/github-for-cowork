@@ -1,0 +1,115 @@
+name: Validate manifest and package
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "manifest.json"
+      - "skills/**"
+      - "color.png"
+      - "outline.png"
+      - ".github/workflows/**"
+  push:
+    branches:
+      - main
+    paths:
+      - "manifest.json"
+      - "skills/**"
+      - "color.png"
+      - "outline.png"
+      - ".github/workflows/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate manifest and tags
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Verify version tag is unique
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="$(python3 - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+
+          version = json.loads(Path("manifest.json").read_text())["version"]
+          if not re.fullmatch(r"\d+\.\d+\.\d+", version):
+              raise ValueError("manifest.json version must have the form MAJOR.MINOR.PATCH")
+          print(version)
+          PY
+          )"
+          TAG_NAME="v$VERSION"
+          echo "Checking if tag $TAG_NAME already exists..."
+          if git rev-parse "$TAG_NAME" >/dev/null 2>&1 || git ls-remote --tags origin "refs/tags/$TAG_NAME" | grep -q "$TAG_NAME"; then
+            echo "::error::Tag $TAG_NAME already exists in the repository. Please bump the version in manifest.json before merging."
+            exit 1
+          fi
+          echo "Tag $TAG_NAME is available."
+
+      - name: Validate package contents and manifest
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import re
+          import struct
+          from pathlib import Path
+          from zipfile import ZIP_DEFLATED, ZipFile
+
+          root = Path.cwd().resolve()
+          manifest = json.loads(Path("manifest.json").read_text())
+          version = manifest.get("version", "")
+          if not re.fullmatch(r"\d+\.\d+\.\d+", version):
+              raise ValueError("manifest.json version must have the form MAJOR.MINOR.PATCH")
+          if manifest.get("icons") != {"color": "color.png", "outline": "outline.png"}:
+              raise ValueError("Manifest must reference color.png and outline.png")
+
+          files = [Path("manifest.json"), Path("color.png"), Path("outline.png")]
+          skills = Path("skills")
+          if not skills.is_dir() or skills.is_symlink():
+              raise ValueError("Expected a real skills directory")
+          for path in skills.rglob("*"):
+              if path.is_symlink():
+                  raise ValueError(f"Symlinks cannot be packaged: {path}")
+              if path.is_file():
+                  files.append(path)
+          files = sorted(files)
+          for path in files:
+              if path.is_symlink() or not path.is_file():
+                  raise ValueError(f"Missing or invalid package file: {path}")
+              if not path.resolve().is_relative_to(root):
+                  raise ValueError(f"File is outside the repository: {path}")
+
+          registered = manifest.get("agentSkills", [])
+          if not registered:
+              raise ValueError("No skills registered in manifest")
+          for entry in registered:
+              folder = (root / entry["folder"]).resolve()
+              if not folder.is_relative_to(root / "skills"):
+                  raise ValueError("Registered skill must be inside skills/")
+              if folder / "SKILL.md" not in [root / path for path in files]:
+                  raise ValueError(f"Missing registered SKILL.md: {folder}")
+
+          for name, dimensions in [
+              ("color.png", (192, 192)), ("outline.png", (32, 32))
+          ]:
+              data = Path(name).read_bytes()
+              if data[:8] != b"\x89PNG\r\n\x1a\n" or data[12:16] != b"IHDR":
+                  raise ValueError(f"Invalid PNG header: {name}")
+              if struct.unpack(">II", data[16:24]) != dimensions:
+                  raise ValueError(f"Incorrect icon dimensions: {name}")
+
+          print(f"Validation successful for v{version} with {len(files)} package files.")
+          PY
