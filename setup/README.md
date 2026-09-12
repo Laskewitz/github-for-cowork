@@ -62,6 +62,10 @@ URL or the homepage URL. Preserve its spelling and capitalization.
    prompt yourself if requested. Store the secret securely and copy it directly
    into the Developer Portal in the next step.
 
+Example GitHub OAuth app settings:
+
+![GitHub OAuth app settings](images/github-oauth-app-settings.png)
+
 Optional: upload the GitHub icon as the application logo, following
 [GitHub's logo usage guidelines](https://github.com/logos).
 
@@ -118,6 +122,10 @@ Use the client ID and secret from the **same** GitHub OAuth app whose redirect
 URI you configured. Do not put the Microsoft 365 app ID in the Client ID field.
 The portal manages the authorization-code exchange and PKCE values; you do not
 need to generate them manually.
+
+Example OAuth client registration:
+
+![OAuth client registration in the Teams Developer Portal](images/oauth-client-registration.png)
 
 ### Choose GitHub scopes
 
@@ -202,6 +210,10 @@ This is a fragment of `toolSource`, not a replacement for the whole manifest.
 Keep the existing names, icons, skill registrations, and schema version.
 Use camel-case **`referenceId`** here, not `reference_id` or
 `oAuthConfigurationId`, which belong to other manifest formats.
+
+Example manifest configuration:
+
+![Manifest OAuth reference configuration](images/manifest-oauth-reference.png)
 
 Do not add a `composeExtensions` section just because some Teams OAuth examples
 show one. This plugin uses an **agent connector**, not a message extension.
