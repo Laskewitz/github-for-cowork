@@ -274,6 +274,8 @@ github-for-cowork.zip
     github-issues/SKILL.md
     github-priority-matrix/SKILL.md
     github-issue-reply/SKILL.md
+    github-dependency-audit/SKILL.md
+    github-branch-cleanup/SKILL.md
     shared/references/github-workflow.md
 ```
 
