@@ -11,7 +11,8 @@ issues, propose next actions, and draft answers you can approve for posting.
    `manifest.json`.
 2. Package `manifest.json`, `color.png`, `outline.png`, and `skills/` into a ZIP.
    Do not include the repository folder, `setup/`, or secrets.
-3. Upload the ZIP through your tenant's custom-plugin flow.
+3. In Copilot Cowork, open **Customize -> Add plugin -> Upload package** and
+   select the ZIP.
 4. In Cowork, try: `List open issues in owner/repo`.
 
 When prompted, sign in to GitHub and approve access. Start with read-only
