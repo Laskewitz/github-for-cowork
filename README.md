@@ -1,10 +1,10 @@
-# GitHub for Cowork
+# 🐙 GitHub for Cowork
 
 Work with GitHub directly in Copilot Cowork. This community-built plugin uses
 the [GitHub remote MCP server](https://api.githubcopilot.com/mcp/) to browse
 issues, propose next actions, and draft answers you can approve for posting.
 
-## Minimal path to awesome
+## 🚀 Minimal path to awesome
 
 1. Follow the [OAuth setup guide](setup/README.md) to create a GitHub OAuth app,
    register it in the Teams Developer Portal, and replace the placeholder in
@@ -18,7 +18,7 @@ issues, propose next actions, and draft answers you can approve for posting.
 When prompted, sign in to GitHub and approve access. Start with read-only
 requests before testing approved comment publishing.
 
-## Five GitHub skills
+## 🧰 Five GitHub skills
 
 | Skill | What it does | Example | Email report |
 | --- | --- | --- | --- |
@@ -32,18 +32,18 @@ Use a specific `owner/repo`, issue URL, explicit repository list, or "all repos"
 Clear requests go directly to the relevant workflow; there is no mandatory quiz.
 If a target is ambiguous, the skill asks one focused question.
 
-## Branding and policies
+## 🎨 Branding and policies
 
 The 192x192 color icon and 32x32 transparent white icon derive from the
 [GitHub mark](https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png)
 and remain subject to [GitHub's logo usage guidelines](https://github.com/logos).
 This is a community-built plugin, not an official GitHub app.
 
-## Credits
+## 🙌 Credits
 
 Built together in collaboration with [Garry Trinder](https://github.com/garrytrinder).
 
-## References
+## 📚 References
 
 - [Build plugins for Copilot Cowork](https://learn.microsoft.com/microsoft-365/copilot/cowork/cowork-plugin-development)
 - [Microsoft 365 app manifest reference](https://learn.microsoft.com/en-us/microsoftteams/platform/resources/schema/manifest-schema)
