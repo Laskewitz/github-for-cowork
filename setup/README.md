@@ -275,12 +275,16 @@ must authorize GitHub access, and tenant/GitHub organization policies still appl
 
 ## 5. Publish a GitHub Release
 
-The [release workflow](../.github/workflows/release.yml) runs when you push a
-tag matching `v*`, or when manually triggered from the Actions tab for an
-existing tag. It accepts release tags of the form `vMAJOR.MINOR.PATCH`,
-checks that the tag matches `version` in the tagged `manifest.json`, verifies
-the registered skill files and icon dimensions, and builds a fresh ZIP from
-the tagged source. It does not upload the prebuilt ZIP from the repository.
+The [release workflow](../.github/workflows/release.yml) runs automatically
+after a pull request is merged into `main`. It reads `version` from
+`manifest.json`, creates a matching annotated `vMAJOR.MINOR.PATCH` tag at the
+merge commit, verifies the registered skill files and icon dimensions, and
+builds a fresh ZIP from the tagged source. It does not upload the prebuilt ZIP
+from the repository.
+
+The workflow also runs when you push a tag matching `v*`, or when manually
+triggered from the Actions tab for an existing tag. These paths validate that
+the tag matches `version` in the tagged `manifest.json`.
 
 The workflow packages **only the manifest, both icons, and all files under
 `skills/`**, then creates a GitHub Release and attaches `github-for-cowork.zip`.
@@ -288,10 +292,9 @@ Setup docs, the root README, workflow files, and other repository files are
 not included.
 
 Release notes list the non-merge commits between the previous tag and this
-one (subject line and short SHA), plus a full-changelog compare link. This
-repo pushes directly to `main` rather than merging pull requests, so GitHub's
-built-in PR-based `--generate-notes` would otherwise produce an empty "What's
-changed" section; the workflow builds notes from `git log` instead.
+one (subject line and short SHA), plus a full-changelog compare link. The
+workflow builds these notes from `git log` so they remain useful for both
+merged pull requests and manually pushed tags.
 
 Before releasing:
 
@@ -301,21 +304,22 @@ Before releasing:
 - Decide whether the release should use your published OAuth registration or
   whether installers must create their own. Including a registration reference
   does not make it usable by every tenant or grant GitHub access.
-- Commit the workflow and intended plugin changes before tagging. Only the
-  source at the tag is packaged; uncommitted changes are not included.
+- Increment `version` in `manifest.json` to an unused semantic version in the
+  pull request. A merge fails to release if its matching tag already exists.
 
-For example, if the manifest version is `1.1.0`, run these commands from a
-checkout at the intended release commit, after confirming that `v1.1.0` does
-not already exist:
+Normally, merging the pull request creates the tag and release without further
+action. To publish manually instead, if the manifest version is `1.1.0`, run
+these commands from a checkout at the intended release commit after confirming
+that `v1.1.0` does not already exist:
 
 ```sh
 git tag -a v1.1.0 -m "GitHub for Cowork 1.1.0"
 git push origin v1.1.0
 ```
 
-For later releases, update the manifest's app `version`, commit the changes,
-and use a new matching tag. Do not change `manifestVersion` just to create a
-release, and do not move or force-push published release tags.
+For later releases, update the manifest's app `version` in the pull request.
+Do not change `manifestVersion` just to create a release, and do not move or
+force-push published release tags.
 
 You can also trigger the same workflow manually instead of pushing a tag: open
 the repository's **Actions** tab, select **Release plugin package**, click
@@ -335,7 +339,6 @@ workflow: it uses the job's automatically supplied `GITHUB_TOKEN`.
 It creates a new release and deliberately does not overwrite an existing one.
 If a run reports that the release already exists, inspect that release and its
 assets before retrying; use a new version/tag for a changed package.
-Creating this workflow does not itself create a tag or publish a release.
 
 ## Troubleshooting
 

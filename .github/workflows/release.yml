@@ -1,6 +1,11 @@
 name: Release plugin package
 
 on:
+  pull_request_target:
+    branches:
+      - main
+    types:
+      - closed
   push:
     tags:
       - "v*"
@@ -15,24 +20,76 @@ permissions:
   contents: read
 
 concurrency:
-  group: release-${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
+  group: release-plugin-package
   cancel-in-progress: false
 
 jobs:
   release:
     name: Build and publish ZIP
+    if: ${{ github.event_name != 'pull_request_target' || github.event.pull_request.merged == true }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
     env:
-      TAG_NAME: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+      RELEASE_SHA: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.merge_commit_sha || github.sha }}
     steps:
       - name: Check out tagged source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event_name == 'pull_request_target' && github.event.pull_request.merge_commit_sha || github.ref }}
           fetch-depth: 0
           persist-credentials: false
+
+      - name: Resolve release tag
+        env:
+          DISPATCH_TAG: ${{ inputs.tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            TAG_NAME="$DISPATCH_TAG"
+          elif [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            TAG_NAME="$GITHUB_REF_NAME"
+          else
+            TAG_NAME="$(python3 - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+
+          version = json.loads(Path("manifest.json").read_text())["version"]
+          if not re.fullmatch(r"\d+\.\d+\.\d+", version):
+              raise ValueError("manifest.json version must have the form MAJOR.MINOR.PATCH")
+          print(f"v{version}")
+          PY
+          )"
+          fi
+          echo "TAG_NAME=$TAG_NAME" >> "$GITHUB_ENV"
+
+      - name: Create release tag
+        if: ${{ github.event_name == 'pull_request_target' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh api "repos/$GH_REPO/git/ref/tags/$TAG_NAME" >/dev/null 2>&1; then
+            echo "::error::Tag $TAG_NAME already exists. Increment version in manifest.json before merging."
+            exit 1
+          fi
+
+          TAG_OBJECT_SHA="$(
+            gh api --method POST "repos/$GH_REPO/git/tags" \
+              --field tag="$TAG_NAME" \
+              --field message="GitHub for Cowork $TAG_NAME" \
+              --field object="$RELEASE_SHA" \
+              --field type=commit \
+              --jq .sha
+          )"
+          gh api --method POST "repos/$GH_REPO/git/refs" \
+            --field ref="refs/tags/$TAG_NAME" \
+            --field sha="$TAG_OBJECT_SHA"
+          git fetch --no-tags origin "refs/tags/$TAG_NAME:refs/tags/$TAG_NAME"
 
       - name: Build and verify package
         env:

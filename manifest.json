@@ -33,10 +33,10 @@
       "folder": "./skills/github-priority-matrix"
     },
     {
-      "folder": "./skills/dependency-audit"
+      "folder": "./skills/github-dependency-audit"
     },
     {
-      "folder": "./skills/branch-cleanup"
+      "folder": "./skills/github-branch-cleanup"
     }
   ],
   "agentConnectors": [
