@@ -4,11 +4,19 @@ Work with GitHub directly in Copilot Cowork. This community-built plugin uses
 the [GitHub remote MCP server](https://api.githubcopilot.com/mcp/) to browse
 issues, propose next actions, and draft answers you can approve for posting.
 
-## Setup
+## Minimal path to awesome
 
-Follow the [OAuth setup guide](setup/README.md) to create a GitHub OAuth app,
-register its credentials in the Teams Developer Portal, and connect the
-registration to this plugin's manifest.
+1. Follow the [OAuth setup guide](setup/README.md) to create a GitHub OAuth app,
+   register it in the Teams Developer Portal, and replace the placeholder in
+   `manifest.json`.
+2. Package `manifest.json`, `color.png`, `outline.png`, and `skills/` into a ZIP.
+   Do not include the repository folder, `setup/`, or secrets.
+3. In Copilot Cowork, open **Customize -> Add plugin -> Upload package** and
+   select the ZIP.
+4. In Cowork, try: `List open issues in owner/repo`.
+
+When prompted, sign in to GitHub and approve access. Start with read-only
+requests before testing approved comment publishing.
 
 ## Shared report requirement
 
