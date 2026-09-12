@@ -2,6 +2,8 @@
 
 [Back to the main README](../README.md)
 
+> **⚠️ Important:** The `manifest.json` in this repository contains `<PLACEHOLDER_REFERENCE_ID>` as a placeholder. You **must** replace this with your own OAuth client registration ID from the Teams Developer Portal (see [Step 2](#2-register-the-oauth-client-in-the-teams-developer-portal) and [Step 3](#3-add-the-registration-to-the-manifest)). Using the placeholder will not work; each installation requires its own registration.
+
 This guide connects GitHub for Cowork to the GitHub remote MCP server using a
 GitHub **OAuth app** and an **OAuth client registration** in the Teams Developer
 Portal. These are separate registrations; neither is a GitHub personal access
@@ -191,7 +193,11 @@ whose `id` is `github`, locate:
 agentConnectors[].toolSource.remoteMcpServer.authorization
 ```
 
-Replace only `referenceId` with the complete registration ID you copied.
+Replace **only** the `referenceId` value with the complete OAuth client registration ID
+you copied from the Teams Developer Portal in Step 2. You will see
+`<PLACEHOLDER_REFERENCE_ID>` in the manifest — **replace this entire placeholder**
+with your unique registration ID.
+
 The relevant `toolSource` fragment should look like this:
 
 ```json
@@ -200,11 +206,16 @@ The relevant `toolSource` fragment should look like this:
     "mcpServerUrl": "https://api.githubcopilot.com/mcp/",
     "authorization": {
       "type": "OAuthPluginVault",
-      "referenceId": "YOUR_OAUTH_CLIENT_REGISTRATION_ID"
+      "referenceId": "YOUR_OAUTH_CLIENT_REGISTRATION_ID_FROM_DEVELOPER_PORTAL"
     }
   }
 }
 ```
+
+**Do not leave the placeholder in place.** The registration ID is unique to each
+OAuth registration. You cannot use the same registration ID across different
+installations or tenants without explicit sharing agreements with those tenants.
+Each setup must have its own Developer Portal registration.
 
 This is a fragment of `toolSource`, not a replacement for the whole manifest.
 Keep the existing names, icons, skill registrations, and schema version.

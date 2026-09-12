@@ -49,7 +49,7 @@
           "mcpServerUrl": "https://api.githubcopilot.com/mcp",
           "authorization": {
             "type": "OAuthPluginVault",
-            "referenceId": "YzRlZGQ0MGUtODdjZi00YzkwLTg5NzAtNTNlNmEzNmRlYzIxIyMyZjYyZWUwMi0wNTRiLTQ2YmItYTYyMi02NDVkMWNkYWQ0NWU="
+            "referenceId": "<PLACEHOLDER_REFERENCE_ID>"
           }
         }
       }
