@@ -89,7 +89,11 @@ jobs:
           gh api --method POST "repos/$GH_REPO/git/refs" \
             --field ref="refs/tags/$TAG_NAME" \
             --field sha="$TAG_OBJECT_SHA"
-          git fetch --no-tags origin "refs/tags/$TAG_NAME:refs/tags/$TAG_NAME"
+
+          # persist-credentials is disabled on checkout, so authenticate this
+          # one-off fetch explicitly instead of relying on a stored credential.
+          git -c http.https://github.com/.extraheader="AUTHORIZATION: bearer ${GH_TOKEN}" \
+            fetch --no-tags origin "refs/tags/$TAG_NAME:refs/tags/$TAG_NAME"
 
       - name: Build and verify package
         env:
