@@ -38,7 +38,6 @@ jobs:
         with:
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event_name == 'pull_request_target' && github.event.pull_request.merge_commit_sha || github.ref }}
           fetch-depth: 0
-          persist-credentials: false
 
       - name: Resolve release tag and ensure unique version
         env:
@@ -132,10 +131,7 @@ jobs:
             --field ref="refs/tags/$TAG_NAME" \
             --field sha="$TAG_OBJECT_SHA"
 
-          # persist-credentials is disabled on checkout, so authenticate this
-          # one-off fetch explicitly instead of relying on a stored credential.
-          git -c http.https://github.com/.extraheader="AUTHORIZATION: bearer ${GH_TOKEN}" \
-            fetch --no-tags origin "refs/tags/$TAG_NAME:refs/tags/$TAG_NAME"
+          git fetch --no-tags origin "refs/tags/$TAG_NAME:refs/tags/$TAG_NAME"
 
       - name: Build and verify package
         env:
