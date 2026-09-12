@@ -1,15 +1,16 @@
-# Set up GitHub OAuth for Cowork
+# 🔐 Set up GitHub OAuth for Cowork
 
 [Back to the main README](../README.md)
 
-> **⚠️ Important:** The `manifest.json` in this repository contains `<PLACEHOLDER_REFERENCE_ID>` as a placeholder. You **must** replace this with your own OAuth client registration ID from the Teams Developer Portal (see [Step 2](#2-register-the-oauth-client-in-the-teams-developer-portal) and [Step 3](#3-add-the-registration-to-the-manifest)). Using the placeholder will not work; each installation requires its own registration.
+> [!IMPORTANT]
+> The `manifest.json` in this repository contains `<PLACEHOLDER_REFERENCE_ID>` as a placeholder. You **must** replace this with your own OAuth client registration ID from the Teams Developer Portal (see [Step 2](#2-register-the-oauth-client-in-the-teams-developer-portal) and [Step 3](#3-add-the-registration-to-the-manifest)). Using the placeholder will not work; each installation requires its own registration.
 
 This guide connects GitHub for Cowork to the GitHub remote MCP server using a
 GitHub **OAuth app** and an **OAuth client registration** in the Teams Developer
 Portal. These are separate registrations; neither is a GitHub personal access
 token or a Microsoft Entra app registration.
 
-## What connects to what
+## 🔗 What connects to what
 
 | Value | Where it comes from | Where it goes |
 | --- | --- | --- |
@@ -23,7 +24,7 @@ ZIP, screenshots, or chat.** The registration ID is a reference to a stored
 configuration, not the secret itself. Use your own registration rather than
 assuming the ID already present in this repository is available to your tenant.
 
-## Prerequisites
+## ✅ Prerequisites
 
 - A GitHub account allowed to create an OAuth app, personally or for an organization.
 - A Microsoft 365 account with access to the Teams Developer Portal and permission
@@ -33,7 +34,7 @@ assuming the ID already present in this repository is available to your tenant.
 - Access to the repositories you intend to use. OAuth does not give a user more
   repository permissions than they already have.
 
-## 1. Create a GitHub OAuth app
+## 1. 🚀 Create a GitHub OAuth app
 
 1. Open [GitHub Developer settings](https://github.com/settings/developers).
 2. Select **OAuth Apps**, then **New OAuth App** or **Register a new application**.
@@ -71,12 +72,12 @@ Example GitHub OAuth app settings:
 Optional: upload the GitHub icon as the application logo, following
 [GitHub's logo usage guidelines](https://github.com/logos).
 
-## 2. Register the OAuth client in the Teams Developer Portal
+## 2. 🧩 Register the OAuth client in the Teams Developer Portal
 
 Open [Tools > OAuth client registration](https://dev.teams.microsoft.com/tools/oauth-configuration/)
 and select **Register Client**. Labels can vary slightly between portal versions.
 
-### App settings
+### ⚙️ App settings
 
 | Portal field | Value or choice |
 | --- | --- |
@@ -107,7 +108,7 @@ For app restrictions:
 Despite the portal's Teams terminology, this registration also supplies the
 OAuth configuration used by the Cowork MCP connector.
 
-### OAuth settings
+### 🔑 OAuth settings
 
 | Portal field | Value |
 | --- | --- |
@@ -129,7 +130,7 @@ Example OAuth client registration:
 
 ![OAuth client registration in the Teams Developer Portal](images/oauth-client-registration.png)
 
-### Choose GitHub scopes
+### 🎯 Choose GitHub scopes
 
 Use the least access needed for the repositories and actions you intend to use.
 The portal's **Scope** field asks for comma-separated entries.
@@ -161,7 +162,7 @@ GitHub's raw OAuth protocol uses space-delimited scopes in authorization
 requests; follow the **comma-separated format in this portal field**, rather
 than manually constructing the authorization URL.
 
-### Token expiration and refresh
+### 🔄 Token expiration and refresh
 
 For an OAuth app issuing expiring access tokens, configure the Refresh endpoint
 as `https://github.com/login/oauth/access_token` and verify that the Cowork
@@ -175,7 +176,7 @@ Requesting `offline_access` also opts a sign-in into expiring tokens and refresh
 it is not needed just to list issues. Do not add it without configuring and
 testing refresh support.
 
-### Save and copy the registration ID
+### 📋 Save and copy the registration ID
 
 Select **Save**, then copy the complete **OAuth client registration ID** shown
 in the registration card. Use the copy button rather than copying a visually
@@ -184,7 +185,7 @@ truncated value.
 This is the value for the manifest. It is **not** the GitHub Client ID, the
 GitHub client secret, or the Microsoft 365 app ID.
 
-## 3. Add the registration to the manifest
+## 3. 📝 Add the registration to the manifest
 
 Open the root [manifest.json](../manifest.json). In the `agentConnectors` entry
 whose `id` is `github`, locate:
@@ -236,9 +237,9 @@ and make the portal's app restriction match it. For updates to the same app,
 retain the app ID and increment the app `version` as required by your deployment
 flow; `manifestVersion` identifies the schema, not your release version.
 
-## 4. Rebuild, upload, and sign in
+## 4. 📦 Rebuild, upload, and sign in
 
-### Create the ZIP
+### 🗜️ Create the ZIP
 
 Save the manifest, then run the following from the **repository root**, not
 from `setup/`. This uses Python 3's standard library and creates a fresh archive,
@@ -279,7 +280,7 @@ github-for-cowork.zip
 There must be no enclosing repository folder inside the ZIP. Rebuild whenever
 you change the manifest or skills; editing files does not update an existing ZIP.
 
-### Upload and verify
+### ⬆️ Upload and verify
 
 1. Use the newly rebuilt ZIP, not an older downloaded package.
    The prebuilt ZIP does not automatically pick up your new registration ID.
@@ -296,7 +297,7 @@ you change the manifest or skills; editing files does not update an existing ZIP
 Registration does not sign every user in or grant repository access. Each user
 must authorize GitHub access, and tenant/GitHub organization policies still apply.
 
-## 5. Publish a GitHub Release
+## 5. 🎉 Publish a GitHub Release
 
 The [release workflow](../.github/workflows/release.yml) runs automatically
 after a pull request is merged into `main`. It reads `version` from
@@ -358,7 +359,7 @@ It creates a new release and deliberately does not overwrite an existing one.
 If a run reports that the release already exists, inspect that release and its
 assets before retrying; use a new version/tag for a changed package.
 
-## Troubleshooting
+## 🛠️ Troubleshooting
 
 | Symptom | Check |
 | --- | --- |
@@ -380,7 +381,7 @@ For secret rotation, create a replacement GitHub client secret, update the
 portal securely, verify the connection, and retire the old secret. Never commit
 either secret. If a secret is exposed, revoke it promptly and replace it.
 
-## References
+## 📚 References
 
 - [Create a GitHub OAuth app](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app)
 - [GitHub OAuth authorization, PKCE, and token refresh](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps)
