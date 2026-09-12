@@ -8,7 +8,9 @@ description: >-
   should I tackle first", or wants open issues ranked by impact and effort
   instead of a plain per-repo listing. Works for one repository, an explicit
   list, or all accessible repositories, and returns a single consolidated
-  list. Read-only; does not comment, label, or close anything.
+  list. Offer the user a choice between Markdown output or an emailed report
+  sent through Copilot Cowork and Outlook with responsive, Outlook-safe
+  HTML/CSS. Read-only; does not comment, label, or close anything.
 compatibility: Requires GitHub remote MCP tools and authorization for the requested repositories.
 ---
 
@@ -77,6 +79,15 @@ use real, retrieved issues and links, escaping `|` and newlines in every cell.
 
 Close with total issues considered, the count per quadrant vs. unranked, and
 any incomplete repositories/pages - never present a partial pull as the full plan.
+
+## Output delivery
+
+Before producing the final plan, ask the user whether they want it as Markdown
+in the chat (default if unspecified) or as an emailed report. If they choose
+email, send the final result to the signed-in user via Copilot Cowork and
+Outlook. The email body should use responsive, Outlook-safe HTML/CSS, with
+clear headings, compact quadrant tables, and readable mobile behavior on
+desktop, web, tablet, and mobile clients.
 
 ## Boundaries
 

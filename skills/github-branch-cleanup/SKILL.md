@@ -4,8 +4,8 @@ description: >-
   Review repository branches for stale, abandoned, or unsafe cleanup candidates.
   Use when the user wants branch hygiene, stale-branch cleanup, merged-release
   cleanup, or a safe check before deleting branches. Produce a concise branch
-  report with age, last activity, merge status, and decision guidance. If the
-  user requests a report, send the final summary to the signed-in user through
+  report with age, last activity, merge status, and decision guidance. Offer
+  the user a choice between Markdown output or an emailed report sent through
   Copilot Cowork and Outlook with responsive, Outlook-safe HTML/CSS.
 compatibility: Requires repository or remote branch metadata and enough access to inspect branch age, merge state, and recent activity.
 ---
@@ -62,12 +62,13 @@ Scope: owner/repo • default branch: main • 17 branches reviewed
 
 Use real branch names and actual evidence; do not fabricate stale states.
 
-## Report requirement
+## Output delivery
 
-When the user requests a report or cleanup overview, send the final result to the
-signed-in user via Copilot Cowork and Outlook. Use responsive, Outlook-safe
-HTML/CSS so the summary renders cleanly in desktop, web, tablet, and mobile
-clients.
+Before producing the final cleanup overview, ask the user whether they want it
+as Markdown in the chat (default if unspecified) or as an emailed report. If
+they choose email, send the final result to the signed-in user via Copilot
+Cowork and Outlook. Use responsive, Outlook-safe HTML/CSS so the summary
+renders cleanly in desktop, web, tablet, and mobile clients.
 
 ## Boundaries
 
