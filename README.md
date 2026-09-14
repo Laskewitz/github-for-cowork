@@ -20,9 +20,9 @@ github-for-cowork/
 │   └── shared/
 │       └── references/
 │           └── github-workflow.md # Shared generic worfklows used by the skills
-├── color.json                     # Microsoft 365 app color icon
+├── color.png                      # Microsoft 365 app color icon
 ├── manifest.json                  # Microsoft 365 app manifest, contains agent skill and MCP server configuration
-├── outline.json                   # Microsoft 365 app outline icon
+├── outline.png                    # Microsoft 365 app outline icon
 ```
 
 ## Features
@@ -52,7 +52,7 @@ To use the plugin, you must meet the following prerequisites:
 
 First download the latest release of the plugin on to your machine:
 
-- Download the ZIP from [latest release](https://github.com/Laskewitz/github-for-cowork/releases/tag/v1.0.5) and extract the contents to a folder in a convenient location on your computer.
+- Download the ZIP from [latest release](https://github.com/Laskewitz/github-for-cowork/releases/latest) and extract the contents to a folder in a convenient location on your computer.
 
 To enable Copilot Cowork to authenticate with GitHub, you need to create a new OAuth app on GitHub:
 
