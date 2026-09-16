@@ -82,6 +82,7 @@ Next, register the GitHub OAuth app as new OAuth client configuration in Microso
    - Client Secret: `<Your GitHub OAuth app Client Secret>`
    - Authorization endpoint: `https://github.com/login/oauth/authorize`
    - Token endpoint: `https://github.com/login/oauth/access_token`
+   - Refresh endpoint: `https://github.com/login/oauth/access_token`
    - Scope: `repo read:org read:user user:email`
    - Enable `Enable Proof Key for Code Exchange (PKCE)` toggle
    - Click **Save**
