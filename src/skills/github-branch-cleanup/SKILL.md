@@ -5,8 +5,8 @@ description: >-
   Use when the user wants branch hygiene, stale-branch cleanup, merged-release
   cleanup, or a safe check before deleting branches. Produce a concise branch
   report with age, last activity, merge status, and decision guidance. Offer
-  the user a choice between Markdown output or an emailed report sent through
-  Copilot Cowork and Outlook with responsive, Outlook-safe HTML/CSS.
+  the user a choice between Markdown output or, when the host supports email,
+  an emailed report with responsive, Outlook-safe HTML/CSS.
 compatibility: Requires repository or remote branch metadata and enough access to inspect branch age, merge state, and recent activity.
 ---
 
@@ -65,9 +65,9 @@ Use real branch names and actual evidence; do not fabricate stale states.
 ## Output delivery
 
 Before producing the final cleanup overview, ask the user whether they want it
-as Markdown in the chat (default if unspecified) or as an emailed report. If
-they choose email, send the final result to the signed-in user via Copilot
-Cowork and Outlook. Use responsive, Outlook-safe HTML/CSS so the summary
+as Markdown in the chat (default if unspecified) or, when email tools are
+available, as an emailed report. If they choose email, send the final result
+to the signed-in user. Use responsive, Outlook-safe HTML/CSS so the summary
 renders cleanly in desktop, web, tablet, and mobile clients.
 
 ## Boundaries

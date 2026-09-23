@@ -1,13 +1,13 @@
 ---
 name: github-issues
 description: >-
-  Browse, list, filter, and triage GitHub issues in Copilot Cowork using the
+  Browse, list, filter, and triage GitHub issues using the
   GitHub remote MCP connection. Use for issues in a specific owner/repo,
   iterating over issues across all repositories accessible to the signed-in
   account, issue backlog reports, and proposed next actions. Produce a separate
   Markdown table per repository with linked issues and clear coverage. Offer
-  the user a choice between Markdown output or an emailed report sent through
-  Copilot Cowork and Outlook with responsive, Outlook-safe HTML/CSS.
+  the user a choice between Markdown output or, when the host supports email,
+  an emailed report with responsive, Outlook-safe HTML/CSS.
   This skill is read-only. For drafting an answer and posting it after approval,
   use github-issue-reply. Do not use for pull-request workflows.
 compatibility: Requires GitHub remote MCP tools and authorization for the requested repositories.
@@ -62,9 +62,9 @@ any incomplete pages, so totals are only claimed exact when retrieval is complet
 ## Output delivery
 
 Before producing the final listing, ask the user whether they want it as
-Markdown in the chat (default if unspecified) or as an emailed report. If they
-choose email, send the final result to the signed-in user via Copilot Cowork
-and Outlook. The email body should use responsive, Outlook-safe HTML/CSS, with
+Markdown in the chat (default if unspecified) or, when email tools are
+available, as an emailed report. If they choose email, send the final result
+to the signed-in user. The email body should use responsive, Outlook-safe HTML/CSS, with
 clear headings, one table per repository, and readable mobile behavior on
 desktop, web, tablet, and mobile clients.
 

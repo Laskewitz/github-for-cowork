@@ -113,7 +113,7 @@ jobs:
             TAG_OBJECT_SHA="$(
               gh api --method POST "repos/$GH_REPO/git/tags" \
                 --field tag="$TAG_NAME" \
-                --field message="GitHub for Cowork $TAG_NAME" \
+                --field message="GitHub $TAG_NAME" \
                 --field object="$RELEASE_SHA" \
                 --field type=commit \
                 --jq .sha
@@ -127,7 +127,7 @@ jobs:
 
       - name: Build and verify package
         env:
-          ASSET_PATH: ${{ runner.temp }}/github-for-cowork.zip
+          ASSET_PATH: ${{ runner.temp }}/github-plugin.zip
         shell: bash
         run: |
           python3 - <<'PY'
@@ -236,12 +236,12 @@ jobs:
 
       - name: Publish GitHub Release
         env:
-          ASSET_PATH: ${{ runner.temp }}/github-for-cowork.zip
+          ASSET_PATH: ${{ runner.temp }}/github-plugin.zip
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         shell: bash
         run: |
           gh release create "$TAG_NAME" "$ASSET_PATH" \
             --verify-tag \
-            --title "GitHub for Cowork $TAG_NAME" \
+            --title "GitHub $TAG_NAME" \
             --notes-file "$NOTES_PATH"

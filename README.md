@@ -1,11 +1,11 @@
-# 🐙 GitHub for Cowork Plugin
+# 🐙 GitHub Plugin
 
-Work with GitHub directly in Copilot Cowork. This community-built plugin enables seamless interaction with GitHub repositories.
+Work with GitHub through a remote MCP server and packaged skills. This community-built plugin can be used by compatible hosts, including Copilot Cowork.
 
 ## Plugin Structure
 
 ```
-github-for-cowork/
+github-plugin/
 ├── skills/
 │   ├── github-issues/
 │   │   └── SKILL.md               # Lists and triages issues in one repo or across accessible repos
@@ -41,7 +41,7 @@ This plugin contains the following skills:
 
 ### GitHub MCP server
 
-This plugin contains the [GitHub MCP server](https://api.githubcopilot.com/mcp/), configured with dynamic tool discovery. Copilot Cowork will discover and use the available tools automatically.
+This plugin contains the [GitHub MCP server](https://api.githubcopilot.com/mcp/), configured with dynamic tool discovery. Compatible hosts can discover and use the available tools automatically.
 
 ## Plugin Setup
 
@@ -54,13 +54,13 @@ First download the latest release of the plugin on to your machine:
 
 - Download the ZIP from [latest release](https://github.com/Laskewitz/github-for-cowork/releases/latest) and extract the contents to a folder in a convenient location on your computer.
 
-To enable Copilot Cowork to authenticate with GitHub, you need to create a new OAuth app on GitHub:
+For Copilot Cowork to authenticate with GitHub, create a new OAuth app on GitHub:
 
 - Open a browser and [Register a new OAuth app](https://github.com/settings/applications/new)
 - In the form, fill in the following fields:
-   - Application name: `GitHub for Cowork`
+   - Application name: `GitHub`
    - Homepage URL: A public page for your plugin, or `https://m365.cloud.microsoft/cowork` for a Cowork test setup
-   - Application description: `Use GitHub issues in Copilot Cowork and post replies after approval.`
+   - Application description: `Use GitHub issues and post replies after approval.`
    - Redirect URI: `https://teams.microsoft.com/api/platform/v1.0/oAuthRedirect`
 - Click **Register application** to complete the setup.
 - On the following page, note the **Client ID** as you'll need this later.
@@ -73,7 +73,7 @@ Next, register the GitHub OAuth app as new OAuth client configuration in Microso
 - Open a new browser tab and navigate to the [Teams Developer Portal](https://dev.teams.microsoft.com/tools/oauth-configuration/) to register your OAuth app.
 - Click **New OAuth client configuration**.
 - Fill in the following fields in the App Settings section:
-   - Registration name: `GitHub for Cowork`
+   - Registration name: `GitHub`
    - Base URL: `https://api.githubcopilot.com/mcp`
    - Restrict usage by org: `Any Microsoft 365 organization`
    - Restrict ugage by app: `7fee2dee-05a8-48be-9270-9cfb97603d77`
@@ -98,7 +98,7 @@ Next, update the app manifest with the OAuth client registration ID.
 
 ![Manifest OAuth reference configuration](img/manifest-oauth-reference.png)
 
-Next, install the plugin in Copilot Cowork:
+Next, install the plugin in Copilot Cowork. Other compatible hosts may use their own plugin installation and OAuth configuration flow.
 
 - Continuing in a browser, navigate to [Copilot Cowork](https://copilot.cloud.microsoft/cowork)
 - In the left sidebar, click **Customize**.

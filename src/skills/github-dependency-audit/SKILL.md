@@ -5,9 +5,9 @@ description: >-
   security issues, and upgrade risk. Use when the user asks for a dependency
   audit, package-health review, upgrade-risk assessment, or maintenance check.
   Produce a concise report with affected packages, risk level, evidence, and
-  recommended next actions. Offer the user a choice between Markdown output or
-  an emailed report sent through Copilot Cowork and Outlook with responsive,
-  Outlook-safe HTML/CSS.
+  recommended next actions. Offer the user a choice between Markdown output or,
+  when the host supports email, an emailed report with responsive, Outlook-safe
+  HTML/CSS.
 compatibility: Requires repository context, package-manager metadata, and access to the target dependency files or package registry information.
 ---
 
@@ -72,9 +72,9 @@ as `Unknown` rather than inventing a conclusion.
 ## Output delivery
 
 Before producing the final audit, ask the user whether they want it as
-Markdown in the chat (default if unspecified) or as an emailed report. If they
-choose email, send the final result to the signed-in user via Copilot Cowork
-and Outlook. The email body should use responsive, Outlook-safe HTML/CSS, with
+Markdown in the chat (default if unspecified) or, when email tools are
+available, as an emailed report. If they choose email, send the final result
+to the signed-in user. The email body should use responsive, Outlook-safe HTML/CSS, with
 clear headings, a compact table layout, and readable mobile behavior on
 desktop, web, tablet, and mobile clients.
 
