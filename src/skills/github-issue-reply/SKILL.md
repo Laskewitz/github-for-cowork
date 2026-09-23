@@ -1,7 +1,7 @@
 ---
 name: github-issue-reply
 description: >-
-  Help answer a GitHub issue in Copilot Cowork: read the issue and discussion,
+  Help answer a GitHub issue: read the issue and discussion,
   propose a helpful evidence-based reply, revise it with the user, and post
   the exact reply as a new issue comment only after explicit approval.
   Use for "draft an answer", "how should I respond to this issue?", and

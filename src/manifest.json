@@ -10,12 +10,12 @@
     "termsOfUseUrl": "https://docs.github.com/en/site-policy/github-terms/github-terms-of-service"
   },
   "name": {
-    "short": "GitHub for Cowork",
-    "full": "GitHub for Copilot Cowork"
+    "short": "GitHub",
+    "full": "GitHub"
   },
   "description": {
-    "short": "Browse, prioritize, and report on GitHub work in Cowork.",
-    "full": "GitHub for Cowork brings GitHub issue and repository maintenance workflows into Copilot Cowork through the GitHub remote MCP server. Browse and triage issues in a selected repository or across repositories accessible through your authorized GitHub connection, with a separate Markdown table for each repository. Turn open issues into a prioritized action plan using an impact vs. effort matrix. Review repository dependencies for drift and upgrade risk, and identify stale or unsafe branches before cleanup. Read issue discussions, propose next actions, and draft helpful replies. Post a new issue comment only after you approve its exact content and destination. Requires GitHub authorization and appropriate repository permissions. This community-built plugin is not an official GitHub app."
+    "short": "Browse, prioritize, and report on GitHub work.",
+    "full": "GitHub provides issue and repository maintenance workflows through the GitHub remote MCP server and packaged skills. Browse and triage issues in a selected repository or across repositories accessible through your authorized GitHub connection, with a separate Markdown table for each repository. Turn open issues into a prioritized action plan using an impact vs. effort matrix. Review repository dependencies for drift and upgrade risk, and identify stale or unsafe branches before cleanup. Read issue discussions, propose next actions, and draft helpful replies. Post a new issue comment only after you approve its exact content and destination. Requires GitHub authorization and appropriate repository permissions. This community-built plugin is not an official GitHub app."
   },
   "icons": {
     "color": "color.png",
@@ -43,7 +43,7 @@
     {
       "id": "github",
       "displayName": "GitHub MCP",
-      "description": "Connect GitHub for Cowork to GitHub through the remote MCP server. Retrieve accessible repository and issue data for browsing, triage, and reply drafting in Copilot Cowork. The packaged skills post issue comments only after explicit approval; available data and actions depend on authorization and exposed MCP tools.",
+      "description": "Connect to GitHub through the remote MCP server. Retrieve accessible repository and issue data for browsing, triage, and reply drafting. The packaged skills post issue comments only after explicit approval; available data and actions depend on authorization and exposed MCP tools.",
       "toolSource": {
         "remoteMcpServer": {
           "mcpServerUrl": "https://api.githubcopilot.com/mcp",

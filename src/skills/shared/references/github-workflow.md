@@ -1,4 +1,4 @@
-# GitHub for Cowork workflow policy
+# GitHub workflow policy
 
 Read this before any skill accesses GitHub. If it cannot be loaded, explain the
 packaging problem and do not make GitHub changes.
